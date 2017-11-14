@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <sdtlib.h>
+#include <stdlib.h>
 #include "cublas_common.h"
 
 const char* cublasGetErrorString(cublasStatus_t status){

@@ -40,6 +40,8 @@ MatrixXf::MatrixXf():MatrixXf(0,0)
 MatrixXf::~MatrixXf(){
 	CUDA_HANDLE_ERROR( cudaFree( device_ptr ) );
 	CUDA_HANDLE_ERROR( cudaFreeHost( host_ptr ) );
+	device_ptr = nullptr;
+	host_ptr = nullptr;
 }
 
 MatrixXf* MatrixXf::setSize(int rows,int cols){

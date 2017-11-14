@@ -32,7 +32,7 @@ namespace mtk{
 
 		void testForwardPropagate(mtk::MatrixXf &output,const mtk::MatrixXf &input) const;
 
-		void activation(mtk::MatrixXf& output,const mtk::MatrixXf& input) const;
+		virtual void activation(mtk::MatrixXf& output,const mtk::MatrixXf& input) const = 0;
 
 		mtk::MatrixXf* getWeightPointer();
 		mtk::MatrixXf* getBiasPointer();

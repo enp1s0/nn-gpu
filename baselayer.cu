@@ -38,7 +38,3 @@ void BaseLayer::learningForwardPropagate(mtk::MatrixXf &output,const mtk::Matrix
 			u1.getDevicePointer(),output_size);
 	this->activation(output,u1);
 }
-
-void BaseLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input) const{
-	input.copy(output);
-}

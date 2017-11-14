@@ -1,9 +1,9 @@
 NVCC=nvcc
-NVCCFLAGS= -arch=sm_60 -std=c++11
+NVCCFLAGS= -arch=sm_60 -std=c++11 -lcublas -lcurand
 CXX=g++
 CXXFLAGS=-std=c++11
 OBJDIR=obj
-OBJLIST=cuda_common.o main.o
+OBJLIST=cuda_common.o main.o cublas_common.o matrix_array.o baselayer.o
 OBJS= $(addprefix $(OBJDIR)/, $(OBJLIST))
 BIN=exec
 
@@ -13,7 +13,7 @@ $(BIN): $(OBJS)
 .SUFFIXES: .o .cu .cpp
 
 .cu.cpp:
-	$(NVCC) --cuda $< -o $@
+	$(NVCC) $(NVCCFLAGS) --cuda $< -o $@
 
 $(OBJDIR)/%.o: %.cpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@

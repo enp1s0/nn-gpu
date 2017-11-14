@@ -4,6 +4,7 @@
 #include "cublas_common.h"
 namespace mtk{
 	class BaseLayer{
+	protected:
 		std::string layer_name;
 		int output_size,input_size;
 		int batch_size;
@@ -24,16 +25,15 @@ namespace mtk{
 		mtk::MatrixXf all1_b; // biasベクトルをbatch_size個並べた行列を作る際に必要
 		mtk::MatrixXf u; // testForwardPropagateで使用
 
+		virtual void activation(mtk::MatrixXf& output,const mtk::MatrixXf& input) const = 0;
 	public:
 		BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t* cublas);
 		~BaseLayer();
-		void learningForwardPropagate(mtk::MatrixXf &output,const mtk::MatrixXf &input);
+		void learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input);
 		void learningReflect();
-		virtual void learningBackPropagate(mtk::MatrixXf& next_error,const mtk::MatrixXf &d2,const mtk::MatrixXf* w2) = 0;
+		virtual void learningBackPropagation(mtk::MatrixXf& next_error,const mtk::MatrixXf &d2,const mtk::MatrixXf* w2) = 0;
 
-		void testForwardPropagate(mtk::MatrixXf &output,const mtk::MatrixXf &input) ;
-
-		virtual void activation(mtk::MatrixXf& output,const mtk::MatrixXf& input) const = 0;
+		void testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) ;
 
 		mtk::MatrixXf* getWeightPointer();
 		mtk::MatrixXf* getBiasPointer();

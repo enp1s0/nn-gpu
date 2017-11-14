@@ -20,7 +20,7 @@ BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string l
 
 BaseLayer::~BaseLayer(){}
 
-void BaseLayer::learningForwardPropagate(mtk::MatrixXf &output,const mtk::MatrixXf& input){
+void BaseLayer::learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf& input){
 	const float one = 1.0f,zero = 0.0f;
 	input.copyTo(z0);
 	cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
@@ -40,7 +40,7 @@ void BaseLayer::learningForwardPropagate(mtk::MatrixXf &output,const mtk::Matrix
 	this->activation(output,u1);
 }
 
-void BaseLayer::testForwardPropagate(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
+void BaseLayer::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
 	const float one = 1.0f;
 	b1.copyTo(u);
 	cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,

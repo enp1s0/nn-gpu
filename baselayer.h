@@ -1,11 +1,13 @@
 #pragma once
 #include <string>
 #include "matrix_array.h"
+#include "cublas_common.h"
 namespace mtk{
 	class BaseLayer{
 		std::string layer_name;
 		int output_size,input_size;
 		int batch_size;
+		cublasHandle_t *cublas;
 
 		mtk::MatrixXf w1;
 		mtk::MatrixXf dw1;
@@ -19,8 +21,10 @@ namespace mtk{
 		mtk::MatrixXf adagrad_w1;
 		mtk::MatrixXf adagrad_b1;
 
+		mtk::MatrixXf all1_b;
+
 	public:
-		BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name);
+		BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t* cublas);
 		~BaseLayer();
 		void learningForwardPropagate(mtk::MatrixXf &output,const mtk::MatrixXf &input);
 		void learningReflect();

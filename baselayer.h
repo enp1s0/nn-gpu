@@ -21,7 +21,8 @@ namespace mtk{
 		mtk::MatrixXf adagrad_w1;
 		mtk::MatrixXf adagrad_b1;
 
-		mtk::MatrixXf all1_b;
+		mtk::MatrixXf all1_b; // biasベクトルをbatch_size個並べた行列を作る際に必要
+		mtk::MatrixXf u; // testForwardPropagateで使用
 
 	public:
 		BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t* cublas);
@@ -30,7 +31,7 @@ namespace mtk{
 		void learningReflect();
 		virtual void learningBackPropagate(mtk::MatrixXf& next_error,const mtk::MatrixXf &d2,const mtk::MatrixXf* w2) = 0;
 
-		void testForwardPropagate(mtk::MatrixXf &output,const mtk::MatrixXf &input) const;
+		void testForwardPropagate(mtk::MatrixXf &output,const mtk::MatrixXf &input) ;
 
 		virtual void activation(mtk::MatrixXf& output,const mtk::MatrixXf& input) const = 0;
 

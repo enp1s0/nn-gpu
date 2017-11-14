@@ -15,13 +15,14 @@ BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string l
 	adagrad_w1.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
 	adagrad_b1.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
 	all1_b.setSize(1,batch_size)->allocateDevice()->initDeviceConstant(1.0f);
+	u.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
 }
 
 BaseLayer::~BaseLayer(){}
 
 void BaseLayer::learningForwardPropagate(mtk::MatrixXf &output,const mtk::MatrixXf& input){
 	const float one = 1.0f,zero = 0.0f;
-	input.copy(z0);
+	input.copyTo(z0);
 	cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,batch_size,1,
 			&one,
@@ -37,4 +38,17 @@ void BaseLayer::learningForwardPropagate(mtk::MatrixXf &output,const mtk::Matrix
 			&one,
 			u1.getDevicePointer(),output_size);
 	this->activation(output,u1);
+}
+
+void BaseLayer::testForwardPropagate(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
+	const float one = 1.0f;
+	b1.copyTo(u);
+	cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+			output_size,1,input_size,
+			&one,
+			w1.getDevicePointer(),output_size,
+			input.getDevicePointer(),1,
+			&one,
+			u.getDevicePointer(),output_size);
+	this->activation(output,u);
 }

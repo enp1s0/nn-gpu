@@ -16,8 +16,8 @@ namespace mtk{
 		float* getHostPointer() const ;
 		void copyToDevice();
 		void copyToHost();
-		void copy(MatrixXf& dest_matrix) const;
-		void copy(float* dest_ptr) const;
+		void copyTo(MatrixXf& dest_matrix) const;
+		void copyTo(float* dest_ptr) const;
 		void operator=(const MatrixXf m);
 		void initDeviceRandom(float min,float max);
 		void initDeviceConstant(float f);

@@ -67,11 +67,11 @@ void MatrixXf::copyToHost(){
 	CUDA_HANDLE_ERROR( cudaMemcpy( host_ptr, device_ptr, sizeof(float) * rows * cols, cudaMemcpyDeviceToHost ) );
 }
 
-void MatrixXf::copy(float* dst_ptr)const{
+void MatrixXf::copyTo(float* dst_ptr)const{
 	deviceCopy<<<BLOCKS,(rows*cols+BLOCKS-1)/BLOCKS>>>(dst_ptr,device_ptr,rows*cols);
 }
-void MatrixXf::copy(mtk::MatrixXf& matrix)const{
-	copy(matrix.getDevicePointer());
+void MatrixXf::copyTo(mtk::MatrixXf& matrix)const{
+	copyTo(matrix.getDevicePointer());
 }
 
 

@@ -28,7 +28,6 @@ SoftmaxLayer::SoftmaxLayer(int input_size,int output_size,int batch_size,std::st
 	BaseLayer(input_size,output_size,batch_size,layer_name,cublas,learning_rate,adagrad_epsilon,attenuation_rate)
 {
 	input_row_0.setSize(1,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
-	all1_u.setSize(output_size,1)->allocateDevice()->initDeviceConstant(1.0f);
 	inverse.setSize(output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	output0.setSize(output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 }
@@ -58,7 +57,7 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 	CUBLAS_HANDLE_ERROR( cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				output_size,batch_size,1,
 				&minus_one,
-				all1_u.getDevicePointer(),output_size,
+				all1_o.getDevicePointer(),output_size,
 				input_row_0.getDevicePointer(),1,
 				&one,
 				output.getDevicePointer(),output_size) );
@@ -67,7 +66,7 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 	CUBLAS_HANDLE_ERROR( cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				1,batch_size,output_size,
 				&one,
-				all1_u.getDevicePointer(),1,
+				all1_o.getDevicePointer(),1,
 				output.getDevicePointer(),output_size,
 				&zero,
 				input_row_0.getDevicePointer(),1));
@@ -77,7 +76,7 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 	CUBLAS_HANDLE_ERROR( cublasSgemm( *cublas, CUBLAS_OP_N,CUBLAS_OP_N,
 				output_size,batch_size,1,
 				&one,
-				all1_u.getDevicePointer(),output_size,
+				all1_o.getDevicePointer(),output_size,
 				input_row_0.getDevicePointer(),1,
 				&zero,
 				inverse.getDevicePointer(),output_size) );

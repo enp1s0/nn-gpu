@@ -5,7 +5,6 @@
 namespace mtk{
 	class SoftmaxLayer : public BaseLayer{
 		mtk::MatrixXf input_row_0;
-		mtk::MatrixXf all1_u;
 		mtk::MatrixXf inverse;
 		mtk::MatrixXf output0;
 		void activation(mtk::MatrixXf& output,const mtk::MatrixXf& input) const;

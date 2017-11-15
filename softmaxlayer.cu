@@ -24,8 +24,8 @@ public:
 	}
 };
 
-SoftmaxLayer::SoftmaxLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t *cublas):
-	BaseLayer(input_size,output_size,batch_size,layer_name,cublas)
+SoftmaxLayer::SoftmaxLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t *cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
+	BaseLayer(input_size,output_size,batch_size,layer_name,cublas,learning_rate,adagrad_epsilon,attenuation_rate)
 {
 	input_row_0.setSize(1,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	all1_u.setSize(output_size,1)->allocateDevice()->initDeviceConstant(1.0f);

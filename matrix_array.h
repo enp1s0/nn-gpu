@@ -1,4 +1,4 @@
-
+#pragma once
 namespace mtk{
 	class MatrixXf{
 		int rows,cols;

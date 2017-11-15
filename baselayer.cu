@@ -22,33 +22,39 @@ BaseLayer::~BaseLayer(){}
 
 void BaseLayer::learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf& input){
 	const float one = 1.0f,zero = 0.0f;
-	input.copyTo(z0);
-	cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+	//input.copyTo(z0);
+	CUBLAS_HANDLE_ERROR(cublasScopy(*cublas,input.getCols()*input.getRows(),
+			input.getDevicePointer(),1,
+			z0.getDevicePointer(),1));
+	CUBLAS_HANDLE_ERROR(cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,batch_size,1,
 			&one,
 			b1.getDevicePointer(),output_size,
 			all1_b.getDevicePointer(),1,
 			&zero,
-			u1.getDevicePointer(),output_size);
-	cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+			u1.getDevicePointer(),output_size));
+	CUBLAS_HANDLE_ERROR(cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,batch_size,input_size,
 			&one,
 			w1.getDevicePointer(),output_size,
 			input.getDevicePointer(),input_size,
 			&one,
-			u1.getDevicePointer(),output_size);
+			u1.getDevicePointer(),output_size));
 	this->activation(output,u1);
 }
 
 void BaseLayer::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
 	const float one = 1.0f;
-	b1.copyTo(u);
-	cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+	//b1.copyTo(u);
+	CUBLAS_HANDLE_ERROR(cublasScopy(*cublas,b1.getCols()*b1.getRows(),
+			b1.getDevicePointer(),1,
+			u.getDevicePointer(),1));
+	CUBLAS_HANDLE_ERROR(cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,1,input_size,
 			&one,
 			w1.getDevicePointer(),output_size,
 			input.getDevicePointer(),1,
 			&one,
-			u.getDevicePointer(),output_size);
+			u.getDevicePointer(),output_size));
 	this->activation(output,u);
 }

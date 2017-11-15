@@ -3,7 +3,7 @@ NVCCFLAGS= -arch=sm_60 -std=c++11 -lcublas -lcurand
 CXX=g++
 CXXFLAGS=-std=c++11
 OBJDIR=obj
-OBJLIST=cuda_common.o main.o cublas_common.o matrix_array.o baselayer.o hiddenlayer.o
+OBJLIST=cuda_common.o main.o cublas_common.o matrix_array.o baselayer.o hiddenlayer.o softmaxlayer.o
 OBJS= $(addprefix $(OBJDIR)/, $(OBJLIST))
 BIN=exec
 

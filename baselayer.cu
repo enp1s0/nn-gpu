@@ -58,3 +58,7 @@ void BaseLayer::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf
 			u.getDevicePointer(),output_size));
 	this->activation(output,u);
 }
+
+void BaseLayer::learningReflect(){
+
+}

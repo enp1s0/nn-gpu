@@ -28,7 +28,6 @@ HiddenLayer::HiddenLayer(int input_size,int output_size,int batch_size,std::stri
 {}
 
 HiddenLayer::~HiddenLayer(){
-	std::cout<<this->layer_name<<" is destructed"<<std::endl;
 }
 //HiddenLayer::~HiddenLayer(){}
 

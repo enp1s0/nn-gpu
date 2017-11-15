@@ -2,6 +2,7 @@
 #include "cuda_common.h"
 #include <curand.h>
 #include <curand_kernel.h>
+#include <random>
 
 using namespace mtk;
 
@@ -94,5 +95,6 @@ void MatrixXf::initDeviceConstant(float f){
 }
 
 void MatrixXf::initDeviceRandom(float min,float max){
-	deviceSetRandom<<<BLOCKS,(rows*cols+BLOCKS-1)/BLOCKS>>>(device_ptr,min,max,0,rows*cols);
+	std::random_device random;
+	deviceSetRandom<<<BLOCKS,(rows*cols+BLOCKS-1)/BLOCKS>>>(device_ptr,min,max,random(),rows*cols);
 }

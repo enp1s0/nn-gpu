@@ -3,6 +3,8 @@
 #include <curand.h>
 #include <curand_kernel.h>
 #include <random>
+#include <iostream>
+#include <iomanip>
 
 using namespace mtk;
 
@@ -81,6 +83,7 @@ void MatrixXf::copyTo(mtk::MatrixXf& matrix)const{
 
 int MatrixXf::getCols()const{return cols;}
 int MatrixXf::getRows()const{return rows;}
+int MatrixXf::getSize()const{return rows * cols;}
 
 float* MatrixXf::getDevicePointer()const{return device_ptr;}
 float* MatrixXf::getHostPointer()const{return host_ptr;}
@@ -97,4 +100,15 @@ void MatrixXf::initDeviceConstant(float f){
 void MatrixXf::initDeviceRandom(float min,float max){
 	std::random_device random;
 	deviceSetRandom<<<BLOCKS,(rows*cols+BLOCKS-1)/BLOCKS>>>(device_ptr,min,max,random(),rows*cols);
+}
+
+void MatrixXf::print(std::string label)const{
+	if(label.compare("") != 0)
+		std::cout<<label<<" = "<<std::endl;
+	for(int i = 0;i < rows;i++){
+		for(int j = 0;j < cols;j++){
+			std::cout<<std::setw(4)<<host_ptr[j * rows + i]<<" ";
+		}
+		std::cout<<std::endl;
+	}
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 namespace mtk{
 	class MatrixXf{
 		int rows,cols;
@@ -12,6 +13,7 @@ namespace mtk{
 		MatrixXf* allocateDevice();
 		int getCols()const;
 		int getRows()const ;
+		int getSize() const;
 		float* getDevicePointer() const;
 		float* getHostPointer() const ;
 		void copyToDevice();
@@ -21,5 +23,6 @@ namespace mtk{
 		void operator=(const MatrixXf m);
 		void initDeviceRandom(float min,float max);
 		void initDeviceConstant(float f);
+		void print(std::string label="") const;
 	};
 }

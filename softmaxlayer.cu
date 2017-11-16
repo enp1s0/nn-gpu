@@ -89,4 +89,7 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 	CUBLAS_HANDLE_ERROR( cublasScopy(cublas,output0.getRows()*output0.getCols(),
 				output0.getDevicePointer(),1,
 				output.getDevicePointer(),1) );
+	//output.copyToHost();
+	//output.print("output");
+	//input.print("input");
 }

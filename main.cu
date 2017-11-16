@@ -3,12 +3,13 @@
 #include "hiddenlayer.h"
 #include "matrix_array.h"
 #include "softmaxlayer.h"
+#include "matrix_function.h"
 
 const int input_size = 28 * 28;
-const int layer0_output_size = 20 * 20;
+const int layer0_output_size = 10 * 20;
 const int layer1_output_size = 10;
-const int batch_size = 64;
-const int calc = 200;
+const int batch_size = 128;
+const int calc = 20000;
 const int test_interval = 500;
 
 int main(){
@@ -30,12 +31,20 @@ int main(){
 	input_error.setSize(layer0_output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	hidden0_error.setSize(layer1_output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	output_error.setSize(layer1_output_size,batch_size)->allocateDevice()->initDeviceConstant(1.0f);
+
+	// teacher
+	mtk::MatrixXf teacher;
+	teacher.setSize(layer1_output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
+	float minus_one = -1.0f;
 	for(int c = 0;c < calc;c++){
 		// 順方向計算
 		layer0.learningForwardPropagation(hidden0,input);
 		layer1.learningForwardPropagation(output,hidden0);
 		// 誤差計算
-
+		mtk::MatrixFunction::copy(cublas,output_error,output);
+		CUBLAS_HANDLE_ERROR(cublasSaxpy(cublas,output.getSize(), &minus_one,
+					teacher.getDevicePointer(),1,
+					output_error.getDevicePointer(),1));
 		// 逆方向計算
 		layer1.learningBackPropagation(	hidden0_error, output_error);
 		layer0.learningBackPropagation( input_error, hidden0_error, layer1.getWeightPointer());

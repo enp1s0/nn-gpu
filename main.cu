@@ -4,11 +4,12 @@
 #include "matrix_array.h"
 #include "softmaxlayer.h"
 #include "matrix_function.h"
+#include "mnist.h"
 
 const int input_size = 28 * 28;
-const int layer0_output_size = 10 * 20;
+const int layer0_output_size = 15 * 15;
 const int layer1_output_size = 10;
-const int batch_size = 128;
+const int batch_size = 512;
 const int calc = 20000;
 const int test_interval = 500;
 
@@ -35,6 +36,19 @@ int main(){
 	// teacher
 	mtk::MatrixXf teacher;
 	teacher.setSize(layer1_output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
+	// 学習データ
+	mtk::MatrixXf mnist_train_data,mnist_teacher_data;
+	mnist_train_data.setSize(input_size,60000)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
+	mnist_teacher_data.setSize(10,60000)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
+	mtk::MNISTLoader mnist;
+	if(mnist.loadMNISTTrainData("train-images-idx3-ubyte","train-labels-idx1-ubyte")){
+		std::cerr<<"invalid training file name"<<std::endl;
+		return 1;
+	}
+	mnist.setTrainDataToMatrix(mnist_train_data,mnist_teacher_data);
+	mnist_train_data.copyToDevice();
+	mnist_teacher_data.copyToDevice();
+	std::cout<<"Training data are loaded"<<std::endl;
 	float minus_one = -1.0f;
 	for(int c = 0;c < calc;c++){
 		// 順方向計算

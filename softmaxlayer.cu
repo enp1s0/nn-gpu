@@ -1,4 +1,5 @@
 #include "softmaxlayer.h"
+#include "matrix_function.h"
 
 using namespace mtk;
 const int BLOCKS = 1 << 7;
@@ -35,21 +36,17 @@ SoftmaxLayer::SoftmaxLayer(int input_size,int output_size,int batch_size,std::st
 SoftmaxLayer::~SoftmaxLayer(){}
 
 void SoftmaxLayer::learningBackPropagation(mtk::MatrixXf& next_error,const mtk::MatrixXf& d2,const mtk::MatrixXf *w2){
-	int d2_size = d2.getRows() * d2.getCols();
-	CUBLAS_HANDLE_ERROR(cublasScopy(cublas, d2_size,
-				d2.getDevicePointer(),1,
-				next_error.getDevicePointer(),1));
-	CUBLAS_HANDLE_ERROR(cublasScopy(cublas, d2_size,
-				d2.getDevicePointer(),1,
-				d1.getDevicePointer(),1));
+	mtk::MatrixFunction::copy(cublas,next_error,d2);
+	mtk::MatrixFunction::copy(cublas,d1,d2);
 }
 
 void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)const {
 	//input行列の0行目を取り出す
 	const float one = 1.0f,minus_one = -1.0f,zero = 0.0f;
-	CUBLAS_HANDLE_ERROR( cublasScopy(cublas,output.getRows()*output.getCols(),
+	mtk::MatrixFunction::copy(cublas,output,input);
+	/*CUBLAS_HANDLE_ERROR( cublasScopy(cublas,output.getRows()*output.getCols(),
 				input.getDevicePointer(),1,
-				output.getDevicePointer(),1) );
+				output.getDevicePointer(),1) );*/
 	// 全列の要素からその列の先頭要素の値を引く
 	CUBLAS_HANDLE_ERROR( cublasScopy(cublas,batch_size,
 				input.getDevicePointer(), output_size,
@@ -86,9 +83,10 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 			inverse.getDevicePointer(),1,
 			output.getDevicePointer(),1,
 			&zero,output0.getDevicePointer(),1));
-	CUBLAS_HANDLE_ERROR( cublasScopy(cublas,output0.getRows()*output0.getCols(),
+	mtk::MatrixFunction::copy(cublas,output,output0);
+	/*CUBLAS_HANDLE_ERROR( cublasScopy(cublas,output0.getRows()*output0.getCols(),
 				output0.getDevicePointer(),1,
-				output.getDevicePointer(),1) );
+				output.getDevicePointer(),1) );*/
 	//output.copyToHost();
 	//output.print("output");
 	//input.print("input");

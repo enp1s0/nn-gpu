@@ -37,6 +37,7 @@ BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string l
 	rdw1.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
 	b1.setSize(output_size,1)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
 	db1.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
+	rdb1.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
 	u1.setSize(output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	z0.setSize(input_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	adagrad_w1.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
@@ -182,3 +183,6 @@ void BaseLayer::learningReflect(){
 
 
 }
+
+mtk::MatrixXf* BaseLayer::getWeightPointer(){return &w1;}
+mtk::MatrixXf* BaseLayer::getBiasPointer(){return &b1;}

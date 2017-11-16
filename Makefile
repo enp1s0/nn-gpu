@@ -22,3 +22,6 @@ $(OBJDIR)/%.o: %.cpp
 clean:
 	rm -rf $(OBJS)
 	rm -rf $(BIN)
+
+cleanlog:
+	rm -rf log*

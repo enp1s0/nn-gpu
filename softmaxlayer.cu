@@ -24,7 +24,7 @@ public:
 	}
 };
 
-SoftmaxLayer::SoftmaxLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t *cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
+SoftmaxLayer::SoftmaxLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
 	BaseLayer(input_size,output_size,batch_size,layer_name,cublas,learning_rate,adagrad_epsilon,attenuation_rate)
 {
 	input_row_0.setSize(1,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
@@ -36,10 +36,10 @@ SoftmaxLayer::~SoftmaxLayer(){}
 
 void SoftmaxLayer::learningBackPropagation(mtk::MatrixXf& next_error,const mtk::MatrixXf& d2,const mtk::MatrixXf *w2){
 	int d2_size = d2.getRows() * d2.getCols();
-	CUBLAS_HANDLE_ERROR(cublasScopy(*cublas, d2_size,
+	CUBLAS_HANDLE_ERROR(cublasScopy(cublas, d2_size,
 				d2.getDevicePointer(),1,
 				next_error.getDevicePointer(),1));
-	CUBLAS_HANDLE_ERROR(cublasScopy(*cublas, d2_size,
+	CUBLAS_HANDLE_ERROR(cublasScopy(cublas, d2_size,
 				d2.getDevicePointer(),1,
 				d1.getDevicePointer(),1));
 }
@@ -47,14 +47,14 @@ void SoftmaxLayer::learningBackPropagation(mtk::MatrixXf& next_error,const mtk::
 void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)const {
 	//input行列の0行目を取り出す
 	const float one = 1.0f,minus_one = -1.0f,zero = 0.0f;
-	CUBLAS_HANDLE_ERROR( cublasScopy(*cublas,output.getRows()*output.getCols(),
+	CUBLAS_HANDLE_ERROR( cublasScopy(cublas,output.getRows()*output.getCols(),
 				input.getDevicePointer(),1,
 				output.getDevicePointer(),1) );
 	// 全列の要素からその列の先頭要素の値を引く
-	CUBLAS_HANDLE_ERROR( cublasScopy(*cublas,batch_size,
+	CUBLAS_HANDLE_ERROR( cublasScopy(cublas,batch_size,
 				input.getDevicePointer(), output_size,
 				input_row_0.getDevicePointer(),1));
-	CUBLAS_HANDLE_ERROR( cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+	CUBLAS_HANDLE_ERROR( cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				output_size,batch_size,1,
 				&minus_one,
 				all1_o.getDevicePointer(),output_size,
@@ -63,7 +63,7 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 				output.getDevicePointer(),output_size) );
 	deviceMap<Exp><<<BLOCKS,(output.getCols()*output.getRows()+BLOCKS-1)/BLOCKS>>>(output.getDevicePointer(),output.getDevicePointer(),output.getCols() * output.getRows());
 	// 和を取る
-	CUBLAS_HANDLE_ERROR( cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+	CUBLAS_HANDLE_ERROR( cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				1,batch_size,output_size,
 				&one,
 				all1_o.getDevicePointer(),1,
@@ -73,7 +73,7 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 	// 逆数を計算
 	deviceMap<Inverse><<<BLOCKS,(input_row_0.getCols()*input_row_0.getRows()+BLOCKS-1)/BLOCKS>>>(input_row_0.getDevicePointer(),input_row_0.getDevicePointer(),input_row_0.getCols() * input_row_0.getRows());
 	// 逆数の行列を計算
-	CUBLAS_HANDLE_ERROR( cublasSgemm( *cublas, CUBLAS_OP_N,CUBLAS_OP_N,
+	CUBLAS_HANDLE_ERROR( cublasSgemm( cublas, CUBLAS_OP_N,CUBLAS_OP_N,
 				output_size,batch_size,1,
 				&one,
 				all1_o.getDevicePointer(),output_size,
@@ -81,12 +81,12 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 				&zero,
 				inverse.getDevicePointer(),output_size) );
 	
-	CUBLAS_HANDLE_ERROR(cublasSsbmv(*cublas,CUBLAS_FILL_MODE_LOWER,
+	CUBLAS_HANDLE_ERROR(cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
 			inverse.getCols()*inverse.getRows(),0,&one,
 			inverse.getDevicePointer(),1,
 			output.getDevicePointer(),1,
 			&zero,output0.getDevicePointer(),1));
-	CUBLAS_HANDLE_ERROR( cublasScopy(*cublas,output0.getRows()*output0.getCols(),
+	CUBLAS_HANDLE_ERROR( cublasScopy(cublas,output0.getRows()*output0.getCols(),
 				output0.getDevicePointer(),1,
 				output.getDevicePointer(),1) );
 }

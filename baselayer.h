@@ -9,7 +9,7 @@ namespace mtk{
 		int output_size,input_size;
 		int batch_size;
 		float attenuation_rate,learning_rate,adagrad_epsilon;
-		cublasHandle_t *cublas;
+		cublasHandle_t cublas;
 
 		mtk::MatrixXf w1;
 		mtk::MatrixXf dw1;
@@ -34,7 +34,7 @@ namespace mtk{
 
 		virtual void activation(mtk::MatrixXf& output,const mtk::MatrixXf& input) const = 0;
 	public:
-		BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t* cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate);
+		BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate);
 		~BaseLayer();
 		void learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input);
 		void learningReflect();

@@ -1,7 +1,7 @@
 #include "matrix_array.h"
 #include "cuda_common.h"
 #include "cublas_common.h"
-#include "matrix_functions.h"
+#include "matrix_function.h"
 #include <iostream>
 #include <chrono>
 //const int BLOCKS = 1 << 7;
@@ -42,7 +42,7 @@ void unary(int r,int c){
 			deviceMap<POI><<<BLOCKS,THREADS>>>(mat1.getDevicePointer(),mat0.getDevicePointer(),mat0.getCols() * mat0.getRows());
 		CUDA_HANDLE_ERROR(cudaDeviceSynchronize());
 		auto stop = std::chrono::system_clock::now();
-		int elapsed = std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count();
+		float elapsed = std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count()/100000.0f;
 		std::cout<<"("<<BLOCKS<<","<<THREADS<<") : "<<elapsed<<" us"<<std::endl;
 	}
 
@@ -77,12 +77,26 @@ void element_wise(cublasHandle_t cublas){
 	showMatrix(mat2);
 }
 
+void copy(cublasHandle_t cublas,int d){
+	mtk::MatrixXf mat0,mat1;
+	mat0.setSize(d,d)->allocateDevice()->allocateHost()->initDeviceRandom(-1.0f,1.0f);
+	mat1.setSize(d,d)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
+	mtk::CublasFunction::copy(cublas,mat1,mat0);
+	mat0.copyToHost();
+	mat1.copyToHost();
+	std::cout<<"mat0"<<std::endl;
+	showMatrix(mat0);
+	std::cout<<"mat1"<<std::endl;
+	showMatrix(mat1);
+}
+
 int main(){
 	cublasHandle_t cublas;
 	CUBLAS_HANDLE_ERROR(cublasCreate(&cublas));
 	//element_wise(cublas);
-	for(int d=4;d<=1<<14;d<<=1)
-		unary(d,d);
+	//for(int d=4;d<=1<<14;d<<=1)
+		//unary(d,d);
+	copy(cublas,10);
 	CUBLAS_HANDLE_ERROR(cublasDestroy( cublas));
 }
 

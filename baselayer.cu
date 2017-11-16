@@ -1,4 +1,5 @@
 #include "baselayer.h"
+#include "matrix_function.h"
 #include "hyperparameter.h"
 
 using namespace mtk;
@@ -28,7 +29,7 @@ public:
 	}
 };
 
-BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t* cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
+BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
 	input_size(input_size),output_size(output_size),batch_size(batch_size),layer_name(layer_name),cublas(cublas),learning_rate(learning_rate),adagrad_epsilon(adagrad_epsilon),attenuation_rate(attenuation_rate)
 {
 	w1.setSize(output_size,input_size)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
@@ -55,17 +56,17 @@ BaseLayer::~BaseLayer(){}
 void BaseLayer::learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf& input){
 	const float one = 1.0f,zero = 0.0f;
 	//input.copyTo(z0);
-	CUBLAS_HANDLE_ERROR(cublasScopy(*cublas,input.getCols()*input.getRows(),
+	CUBLAS_HANDLE_ERROR(cublasScopy(cublas,input.getCols()*input.getRows(),
 			input.getDevicePointer(),1,
 			z0.getDevicePointer(),1));
-	CUBLAS_HANDLE_ERROR(cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,batch_size,1,
 			&one,
 			b1.getDevicePointer(),output_size,
 			all1_b.getDevicePointer(),1,
 			&zero,
 			u1.getDevicePointer(),output_size));
-	CUBLAS_HANDLE_ERROR(cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,batch_size,input_size,
 			&one,
 			w1.getDevicePointer(),output_size,
@@ -78,10 +79,10 @@ void BaseLayer::learningForwardPropagation(mtk::MatrixXf &output,const mtk::Matr
 void BaseLayer::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
 	const float one = 1.0f;
 	//b1.copyTo(u);
-	CUBLAS_HANDLE_ERROR(cublasScopy(*cublas,b1.getCols()*b1.getRows(),
+	CUBLAS_HANDLE_ERROR(cublasScopy(cublas,b1.getCols()*b1.getRows(),
 			b1.getDevicePointer(),1,
 			u.getDevicePointer(),1));
-	CUBLAS_HANDLE_ERROR(cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,1,input_size,
 			&one,
 			w1.getDevicePointer(),output_size,
@@ -94,13 +95,13 @@ void BaseLayer::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf
 void BaseLayer::learningReflect(){
 	const float one = 1.0f,zero = 0.0f;
 	const float minus_learning_rate = -learning_rate;
-	CUBLAS_HANDLE_ERROR( cublasSsbmv(*cublas,CUBLAS_FILL_MODE_LOWER,
+	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
 				rdw1.getCols()*rdw1.getRows(),0,&one,
 				rdw1.getDevicePointer(),1,
 				rdw1.getDevicePointer(),1,
 				&one,
 				adagrad_w1.getDevicePointer(),1) );
-	CUBLAS_HANDLE_ERROR( cublasSsbmv(*cublas,CUBLAS_FILL_MODE_LOWER,
+	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
 				rdb1.getCols()*rdb1.getRows(),0,&one,
 				rdb1.getDevicePointer(),1,
 				rdb1.getDevicePointer(),1,
@@ -108,7 +109,7 @@ void BaseLayer::learningReflect(){
 				adagrad_b1.getDevicePointer(),1) );
 	// dw1を作る
 	deviceMap<AdagradMake><<<BLOCKS,(adagrad_w1.getCols()*adagrad_w1.getRows()+BLOCKS-1)/BLOCKS>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_w1.getCols() * adagrad_w1.getRows());
-	CUBLAS_HANDLE_ERROR( cublasSsbmv(*cublas,CUBLAS_FILL_MODE_LOWER,
+	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
 				rdw1.getCols() * rdw1.getRows(),0,
 				&minus_learning_rate,
 				rdw1.getDevicePointer(),1,
@@ -117,7 +118,7 @@ void BaseLayer::learningReflect(){
 				dw1.getDevicePointer(),1));
 	// db1を作る
 	deviceMap<AdagradMake><<<BLOCKS,(adagrad_w1.getCols()*adagrad_w1.getRows()+BLOCKS-1)/BLOCKS>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_w1.getCols() * adagrad_w1.getRows());
-	CUBLAS_HANDLE_ERROR( cublasSsbmv(*cublas,CUBLAS_FILL_MODE_LOWER,
+	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
 				rdb1.getCols() * rdb1.getRows(),0,
 				&minus_learning_rate,
 				rdb1.getDevicePointer(),1,
@@ -126,20 +127,20 @@ void BaseLayer::learningReflect(){
 				db1.getDevicePointer(),1));
 
 	// 更新
-	CUBLAS_HANDLE_ERROR( cublasSaxpy( *cublas, w1.getRows() * w1.getCols(),
+	CUBLAS_HANDLE_ERROR( cublasSaxpy( cublas, w1.getRows() * w1.getCols(),
 				&one,
 				dw1.getDevicePointer(),1,
 				w1.getDevicePointer(),1) );
-	CUBLAS_HANDLE_ERROR( cublasSaxpy( *cublas, b1.getRows() * b1.getCols(),
+	CUBLAS_HANDLE_ERROR( cublasSaxpy( cublas, b1.getRows() * b1.getCols(),
 				&one,
 				db1.getDevicePointer(),1,
 				b1.getDevicePointer(),1) );
 
 	// 重みが大きくなりすぎないように
 	int max_w_index = 0;
-	CUBLAS_HANDLE_ERROR( cublasIsamax( *cublas,w1.getRows()*w1.getCols(),
+	CUBLAS_HANDLE_ERROR( cublasIsamax( cublas,w1.getRows()*w1.getCols(),
 				w1.getDevicePointer(),1,&max_w_index) );
-	CUBLAS_HANDLE_ERROR( cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+	CUBLAS_HANDLE_ERROR( cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				1,output_size,1,
 				&one,
 				w1.getDevicePointer()+max_w_index,1,
@@ -147,7 +148,7 @@ void BaseLayer::learningReflect(){
 				&zero,
 				max_b_i.getDevicePointer(),1));
 	deviceMap<MaxAndInverse><<<BLOCKS,(max_b_i.getCols()*max_b_i.getRows()+BLOCKS-1)/BLOCKS>>>(max_b_i.getDevicePointer(),max_b_i.getDevicePointer(),1.0f,max_b_i.getCols() * max_b_i.getRows());
-	CUBLAS_HANDLE_ERROR( cublasSgemm(*cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+	CUBLAS_HANDLE_ERROR( cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				output_size,input_size,1,
 				&one,
 				max_b_i.getDevicePointer(),output_size,
@@ -155,14 +156,14 @@ void BaseLayer::learningReflect(){
 				&zero,
 				max_w_i.getDevicePointer(),output_size));
 	// 正規化
-	CUBLAS_HANDLE_ERROR( cublasSsbmv(*cublas, CUBLAS_FILL_MODE_LOWER,
+	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas, CUBLAS_FILL_MODE_LOWER,
 				max_w_i.getCols() * max_w_i.getRows(),0,
 				&one,
 				max_w_i.getDevicePointer(),1,
 				w1.getDevicePointer(),1,
 				&zero,
 				w1_tmp.getDevicePointer(),1));
-	CUBLAS_HANDLE_ERROR( cublasSsbmv(*cublas, CUBLAS_FILL_MODE_LOWER,
+	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas, CUBLAS_FILL_MODE_LOWER,
 				max_b_i.getCols() * max_b_i.getRows(),0,
 				&one,
 				max_b_i.getDevicePointer(),1,
@@ -172,10 +173,10 @@ void BaseLayer::learningReflect(){
 
 
 	// 結果をコピー
-	CUBLAS_HANDLE_ERROR( cublasScopy( *cublas, w1.getRows()*w1.getCols(),
+	CUBLAS_HANDLE_ERROR( cublasScopy( cublas, w1.getRows()*w1.getCols(),
 				w1_tmp.getDevicePointer(),1,
 				w1.getDevicePointer(),1) );
-	CUBLAS_HANDLE_ERROR( cublasScopy( *cublas, b1.getRows()*b1.getCols(),
+	CUBLAS_HANDLE_ERROR( cublasScopy( cublas, b1.getRows()*b1.getCols(),
 				b1_tmp.getDevicePointer(),1,
 				b1.getDevicePointer(),1) );
 

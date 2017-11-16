@@ -36,7 +36,7 @@ void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::
 	const float one = 1.0f,zero = 0.0f;
 	deviceMap<dActReLU><<<BLOCKS,(u1_size+BLOCKS-1)/BLOCKS>>>(u1.getDevicePointer(),u1.getDevicePointer(),u1_size);
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_T,CUBLAS_OP_N,
-			output_size,batch_size,input_size,
+			output_size,batch_size,w2->getRows(),
 			&one,
 			w2->getDevicePointer(),w2->getRows(),
 			d2.getDevicePointer(),d2.getRows(),
@@ -56,8 +56,8 @@ void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::
 			z0.getDevicePointer(),z0.getRows(),
 			&zero,
 			rdw1.getDevicePointer(),rdw1.getRows()));
-	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_T,
-			output_size,input_size,batch_size,
+	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+			output_size,1,batch_size,
 			&alpha,
 			next_error.getDevicePointer(),next_error.getRows(),
 			all1_b.getDevicePointer(),z0.getRows(),

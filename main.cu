@@ -10,7 +10,7 @@ const int input_size = 28 * 28;
 const int layer0_output_size = 25 * 15;
 const int layer1_output_size = 10;
 const int batch_size = 512;
-const int calc = 40000;
+const int calc = 8000;
 const int test_interval = 500;
 
 int main(){
@@ -37,13 +37,18 @@ int main(){
 	mtk::MatrixXf teacher;
 	teacher.setSize(layer1_output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	// 学習データ
+	std::cout<<"Loading training data ... ";std::cout.flush();
 	mtk::MNISTLoader mnist;
 	if(mnist.loadMNISTTrainData("train-images-idx3-ubyte","train-labels-idx1-ubyte")){
+		std::cout<<std::endl;
 		std::cerr<<"invalid training file name"<<std::endl;
 		return 1;
 	}
+	std::cout<<"DONE"<<std::endl;
+	std::cout<<"Start training"<<std::endl;
 	float minus_one = -1.0f;
 	for(int c = 0;c < calc;c++){
+		mnist.setTrainDataToMatrix(input,teacher,batch_size);
 		// 順方向計算
 		layer0.learningForwardPropagation(hidden0,input);
 		layer1.learningForwardPropagation(output,hidden0);
@@ -58,7 +63,8 @@ int main(){
 		// 反映
 		layer0.learningReflect();
 		layer1.learningReflect();
-		if((c+1)%test_interval == 0){std::cout<<c<<std::endl;}
+		if((c+1)%test_interval == 0){std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;}
 	}
+	std::cout<<"Done"<<std::endl;
 	CUBLAS_HANDLE_ERROR(cublasDestroy( cublas));
 }

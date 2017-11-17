@@ -6,11 +6,23 @@
 
 using namespace mtk;
 
-__global__ void deviceRandomArrangement(float* input,float* teacher,float *image_data,float *label_data,int max_t){
-	
+__global__ void deviceRandomArrangement(float* input,float* teacher,float *image_data,float *label_data,int batch_size,int seed){
+	int tid = blockIdx.x * blockDim.x + threadIdx.x;
+	if (tid >= batch_size)return;
+	curandState s;
+	curand_init(seed,tid,0,&s);
+	int data_id = curand_uniform(&s) * 60000;
+	for(int i = 0;i < 28*28;i++){
+		input[i+tid*28*28] = image_data[i+data_id*28*28];
+	}
+	for(int i = 0;i < 10;i++){
+		teacher[i + tid*10] = label_data[i + data_id*10];
+	}
 }
 
 MNISTLoader::MNISTLoader(){
+	std::random_device rnd;
+	mt.seed(rnd());
 	image_data.setSize(28*28,train_data_amount)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
 	label_data.setSize(10,train_data_amount)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
 }
@@ -38,6 +50,7 @@ void MNISTLoader::printTestImage(int n){
 
 void MNISTLoader::setTrainDataToMatrix(mtk::MatrixXf& input,mtk::MatrixXf& teacher,int batch_size){
 	teacher.initDeviceConstant(0.0f);
+	deviceRandomArrangement<<<64,threads_ceildiv(batch_size,64)>>>(input.getDevicePointer(),teacher.getDevicePointer(),image_data.getDevicePointer(),label_data.getDevicePointer(),batch_size,mt());
 }
 
 int MNISTLoader::setTestDataToMatrix(mtk::MatrixXf& input,int index){

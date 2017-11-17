@@ -1,7 +1,9 @@
+#pragma once
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <random>
 #include "matrix_array.h"
 
 namespace mtk{
@@ -11,6 +13,7 @@ namespace mtk{
 		const static int train_data_amount = 60000;
 		const static int data_dim = 28;
 		mtk::MatrixXf image_data,label_data;
+		std::mt19937 mt;
 
 		//データ格納関係
 		class MNISTData{

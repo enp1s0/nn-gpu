@@ -54,7 +54,7 @@ int MNISTLoader::loadMNISTData(std::string image_filename,std::string label_file
 
 	int magic_number,amount,row,col;
 	int label;
-	char read_1byte;
+	//char read_1byte;
 	int read_1byte_int;
 	image_ifs.read((char*)&magic_number,sizeof(magic_number));
 	magic_number = reverse( magic_number );

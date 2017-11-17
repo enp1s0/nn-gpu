@@ -7,10 +7,10 @@
 #include "mnist.h"
 
 const int input_size = 28 * 28;
-const int layer0_output_size = 15 * 15;
+const int layer0_output_size = 25 * 15;
 const int layer1_output_size = 10;
 const int batch_size = 512;
-const int calc = 20000;
+const int calc = 40000;
 const int test_interval = 500;
 
 int main(){

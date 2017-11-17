@@ -7,3 +7,6 @@ void cudaHandleError( cudaError_t err,const char *file,int line ) {
 		exit( EXIT_FAILURE );
 	}
 }
+__host__ __device__ inline int threads_ceildiv(int blocks,int size){
+	return (blocks + size - 1)/blocks;
+}

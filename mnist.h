@@ -10,6 +10,7 @@ namespace mtk{
 		// いつかファイルから読み込みたい
 		const static int train_data_amount = 60000;
 		const static int data_dim = 28;
+		mtk::MatrixXf image_data,label_data;
 
 		//データ格納関係
 		class MNISTData{
@@ -24,7 +25,7 @@ namespace mtk{
 	public:
 		MNISTLoader();
 		~MNISTLoader();
-		void setTrainDataToMatrix(mtk::MatrixXf& input,mtk::MatrixXf& teacher);
+		void setTrainDataToMatrix(mtk::MatrixXf& input,mtk::MatrixXf& teacher,int batch_size);
 		int setTestDataToMatrix(mtk::MatrixXf& input,int index);
 		int loadMNISTTrainData(std::string image_filename,std::string label_filename);
 		int loadMNISTTestData(std::string image_filename,std::string label_filename);

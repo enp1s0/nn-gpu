@@ -1,6 +1,14 @@
 #include "mnist.h"
+#include "cuda_common.h"
+#include <curand.h>
+#include <curand_kernel.h>
+#include <random>
 
 using namespace mtk;
+
+__global__ void deviceRandomArrangement(float* input,float* teacher,float *image_data,float *label_data,int max_t){
+	
+}
 
 MNISTLoader::MNISTLoader(){}
 int MNISTLoader::reverse(int n){
@@ -25,16 +33,8 @@ void MNISTLoader::printTestImage(int n){
 	printImage( test_data_vector[n]->data );
 }
 
-void MNISTLoader::setTrainDataToMatrix(mtk::MatrixXf& input,mtk::MatrixXf& teacher){
-	//teacher.setZero();
-	for(int i = 0;i < train_data_amount;i++){
-		MNISTData* data = train_data_vector[i];
-		for(int j = 0;j < data_dim*data_dim;j++){
-			input.getHostPointer()[j + i * 28 * 28] = data->data[j];
-		}
-		teacher.getHostPointer()[data->label + i * 10] = 1.0f;
-		//teacher(data->label,i) = 1.0f;
-	}
+void MNISTLoader::setTrainDataToMatrix(mtk::MatrixXf& input,mtk::MatrixXf& teacher,int batch_size){
+	teacher.initDeviceConstant(0.0f);
 }
 
 int MNISTLoader::setTestDataToMatrix(mtk::MatrixXf& input,int index){
@@ -93,7 +93,16 @@ int MNISTLoader::loadMNISTData(std::string image_filename,std::string label_file
 }
 
 int MNISTLoader::loadMNISTTrainData(std::string image_filename,std::string label_filename){
-	return this->loadMNISTData(image_filename,label_filename,train_data_vector);
+	int res = this->loadMNISTData(image_filename,label_filename,train_data_vector);
+	for(int i = 0;i < train_data_amount;i++){
+		MNISTData* data = train_data_vector[i];
+		for(int j = 0;j < data_dim*data_dim;j++){
+			image_data.getHostPointer()[j + i * 28 * 28] = data->data[j];
+		}
+		label_data.getHostPointer()[data->label + i * 10] = 1.0f;
+		//teacher(data->label,i) = 1.0f;
+	}
+	return res;
 }
 int MNISTLoader::loadMNISTTestData(std::string image_filename,std::string label_filename){
 	return this->loadMNISTData(image_filename,label_filename,test_data_vector);

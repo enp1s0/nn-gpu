@@ -37,24 +37,17 @@ int main(){
 	mtk::MatrixXf teacher;
 	teacher.setSize(layer1_output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	// 学習データ
-	mtk::MatrixXf mnist_train_data,mnist_teacher_data;
-	mnist_train_data.setSize(input_size,60000)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
-	mnist_teacher_data.setSize(10,60000)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
 	mtk::MNISTLoader mnist;
 	if(mnist.loadMNISTTrainData("train-images-idx3-ubyte","train-labels-idx1-ubyte")){
 		std::cerr<<"invalid training file name"<<std::endl;
 		return 1;
 	}
-	mnist.setTrainDataToMatrix(mnist_train_data,mnist_teacher_data);
-	mnist_train_data.copyToDevice();
-	mnist_teacher_data.copyToDevice();
-	std::cout<<"Training data are loaded"<<std::endl;
 	float minus_one = -1.0f;
 	for(int c = 0;c < calc;c++){
 		// 順方向計算
 		layer0.learningForwardPropagation(hidden0,input);
 		layer1.learningForwardPropagation(output,hidden0);
-		// 誤差計算
+		// 出力層の誤差計算
 		mtk::MatrixFunction::copy(cublas,output_error,output);
 		CUBLAS_HANDLE_ERROR(cublasSaxpy(cublas,output.getSize(), &minus_one,
 					teacher.getDevicePointer(),1,

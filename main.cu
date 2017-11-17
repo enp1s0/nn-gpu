@@ -9,7 +9,7 @@
 const int input_size = 28 * 28;
 const int layer0_output_size = 25 * 15;
 const int layer1_output_size = 10;
-const int batch_size = 512;
+const int batch_size = 16;
 const int calc = 8000;
 const int test_interval = 500;
 
@@ -65,6 +65,9 @@ int main(){
 		layer1.learningReflect();
 		if((c+1)%test_interval == 0){std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;}
 	}
+	output_error.allocateHost();
+	output_error.copyToHost();
+	output_error.print("output error");
 	std::cout<<"Done"<<std::endl;
 	CUBLAS_HANDLE_ERROR(cublasDestroy( cublas));
 }

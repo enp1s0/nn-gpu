@@ -1,5 +1,6 @@
 #include "softmaxlayer.h"
 #include "matrix_function.h"
+#include "cuda_common.h"
 
 using namespace mtk;
 const int BLOCKS = 1 << 7;
@@ -58,7 +59,7 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 				input_row_0.getDevicePointer(),1,
 				&one,
 				output.getDevicePointer(),output_size) );
-	deviceMap<Exp><<<BLOCKS,(output.getCols()*output.getRows()+BLOCKS-1)/BLOCKS>>>(output.getDevicePointer(),output.getDevicePointer(),output.getCols() * output.getRows());
+	deviceMap<Exp><<<BLOCKS,threads_ceildiv(output.getSize(),BLOCKS)>>>(output.getDevicePointer(),output.getDevicePointer(),output.getSize());
 	// 和を取る
 	CUBLAS_HANDLE_ERROR( cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				1,batch_size,output_size,
@@ -68,7 +69,7 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 				&zero,
 				input_row_0.getDevicePointer(),1));
 	// 逆数を計算
-	deviceMap<Inverse><<<BLOCKS,(input_row_0.getCols()*input_row_0.getRows()+BLOCKS-1)/BLOCKS>>>(input_row_0.getDevicePointer(),input_row_0.getDevicePointer(),input_row_0.getCols() * input_row_0.getRows());
+	deviceMap<Inverse><<<BLOCKS,threads_ceildiv(input_row_0.getSize(),BLOCKS)>>>(input_row_0.getDevicePointer(),input_row_0.getDevicePointer(),input_row_0.getSize());
 	// 逆数の行列を計算
 	CUBLAS_HANDLE_ERROR( cublasSgemm( cublas, CUBLAS_OP_N,CUBLAS_OP_N,
 				output_size,batch_size,1,

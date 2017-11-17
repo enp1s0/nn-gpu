@@ -1,4 +1,5 @@
 #include "hiddenlayer.h"
+#include "cuda_common.h"
 #include "activation.h"
 #include <iostream>
 
@@ -67,6 +68,5 @@ void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::
 }
 
 void HiddenLayer::activation(mtk::MatrixXf &output, const mtk::MatrixXf &input) const {
-	int matrix_size = input.getCols() * input.getRows();
-	deviceMap<dActReLU><<<BLOCKS,(matrix_size+BLOCKS-1)/BLOCKS>>>(output.getDevicePointer(),input.getDevicePointer(),matrix_size);
+	deviceMap<dActReLU><<<BLOCKS,threads_ceildiv(input.getSize(),BLOCKS)>>>(output.getDevicePointer(),input.getDevicePointer(),input.getSize());
 }

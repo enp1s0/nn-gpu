@@ -1,6 +1,7 @@
 #include "baselayer.h"
 #include "matrix_function.h"
 #include "hyperparameter.h"
+#include "cuda_common.h"
 
 using namespace mtk;
 const int BLOCKS = 1 << 7;
@@ -109,7 +110,7 @@ void BaseLayer::learningReflect(){
 				&one,
 				adagrad_b1.getDevicePointer(),1) );
 	// dw1を作る
-	deviceMap<AdagradMake><<<BLOCKS,(adagrad_w1.getCols()*adagrad_w1.getRows()+BLOCKS-1)/BLOCKS>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_w1.getCols() * adagrad_w1.getRows());
+	deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_w1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_w1.getSize());
 	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
 				rdw1.getCols() * rdw1.getRows(),0,
 				&minus_learning_rate,
@@ -118,7 +119,7 @@ void BaseLayer::learningReflect(){
 				&attenuation_rate,
 				dw1.getDevicePointer(),1));
 	// db1を作る
-	deviceMap<AdagradMake><<<BLOCKS,(adagrad_w1.getCols()*adagrad_w1.getRows()+BLOCKS-1)/BLOCKS>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_w1.getCols() * adagrad_w1.getRows());
+	deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_b1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_b1.getSize());
 	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
 				rdb1.getCols() * rdb1.getRows(),0,
 				&minus_learning_rate,
@@ -148,7 +149,7 @@ void BaseLayer::learningReflect(){
 				all1_o.getDevicePointer(),1,
 				&zero,
 				max_b_i.getDevicePointer(),1));
-	deviceMap<MaxAndInverse><<<BLOCKS,(max_b_i.getCols()*max_b_i.getRows()+BLOCKS-1)/BLOCKS>>>(max_b_i.getDevicePointer(),max_b_i.getDevicePointer(),1.0f,max_b_i.getCols() * max_b_i.getRows());
+	deviceMap<MaxAndInverse><<<BLOCKS,threads_ceildiv(max_b_i.getSize(),BLOCKS)>>>(max_b_i.getDevicePointer(),max_b_i.getDevicePointer(),1.0f,max_b_i.getSize());
 	CUBLAS_HANDLE_ERROR( cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				output_size,input_size,1,
 				&one,

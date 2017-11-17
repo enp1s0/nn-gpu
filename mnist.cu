@@ -10,7 +10,10 @@ __global__ void deviceRandomArrangement(float* input,float* teacher,float *image
 	
 }
 
-MNISTLoader::MNISTLoader(){}
+MNISTLoader::MNISTLoader(){
+	image_data.setSize(28*28,train_data_amount)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
+	label_data.setSize(10,train_data_amount)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
+}
 int MNISTLoader::reverse(int n){
 	char a0,a1,a2,a3;
 	a0 = (n>>24) & 255;
@@ -102,6 +105,8 @@ int MNISTLoader::loadMNISTTrainData(std::string image_filename,std::string label
 		label_data.getHostPointer()[data->label + i * 10] = 1.0f;
 		//teacher(data->label,i) = 1.0f;
 	}
+	image_data.copyToDevice();
+	label_data.copyToDevice();
 	return res;
 }
 int MNISTLoader::loadMNISTTestData(std::string image_filename,std::string label_filename){

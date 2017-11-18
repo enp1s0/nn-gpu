@@ -38,8 +38,9 @@ void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::
 	int u1_size = u1.getRows() * u1.getCols();
 	const float one = 1.0f,zero = 0.0f;
 	deviceMap<dActReLU><<<BLOCKS,threads_ceildiv(u1.getSize(),BLOCKS)>>>(u1.getDevicePointer(),u1.getDevicePointer(),u1.getSize());
+	CUDA_HANDLE_ERROR(cudaDeviceSynchronize());
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_T,CUBLAS_OP_N,
-			output_size,batch_size,w2->getRows(),
+			u.getRows(),u.getCols(),d2.getRows(),
 			&one,
 			w2->getDevicePointer(),w2->getRows(),
 			d2.getDevicePointer(),d2.getRows(),

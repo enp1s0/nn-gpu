@@ -49,7 +49,7 @@ void MNISTLoader::printTestImage(int n){
 }
 
 void MNISTLoader::setTrainDataToMatrix(mtk::MatrixXf& input,mtk::MatrixXf& teacher,int batch_size){
-	teacher.initDeviceConstant(0.0f);
+	//teacher.initDeviceConstant(0.0f);
 	deviceRandomArrangement<<<64,threads_ceildiv(batch_size,64)>>>(input.getDevicePointer(),teacher.getDevicePointer(),image_data.getDevicePointer(),label_data.getDevicePointer(),batch_size,mt());
 }
 

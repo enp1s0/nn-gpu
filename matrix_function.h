@@ -23,7 +23,7 @@ namespace mtk {
 	class MatrixFunction{
 	public:
 		static void copy(cublasHandle_t cublas,mtk::MatrixXf& dst,const mtk::MatrixXf& src);
-		static void elementwiseProduct(cublasHandle_t cublas,mtk::MatrixXf& dst,const mtk::MatrixXf& src0,const mtk::MatrixXf& src1);
+		static void elementwiseProduct(cublasHandle_t cublas,mtk::MatrixXf& dst,const mtk::MatrixXf& src0,const mtk::MatrixXf& src1,float a=1.0f,float b=0.0f);
 		template<class T>
 			static void map(mtk::MatrixXf& output,const mtk::MatrixXf& input){
 				const int BLOCKS = 1 << 7;

@@ -121,7 +121,10 @@ MatrixXf* MatrixXf::print(std::string label){
 		std::cout<<label<<" = "<<std::endl;
 	for(int i = 0;i < rows;i++){
 		for(int j = 0;j < cols;j++){
-			printf("%.4f ",host_ptr[j * rows + i]);
+			if(host_ptr[j * rows + i] > 0)
+				printf(" %.3f ",host_ptr[j * rows + i]);
+			else
+				printf("%.3f ",host_ptr[j * rows + i]);
 			//std::cout<<std::setw(5)<<host_ptr[j * rows + i]<<" ";
 		}
 		std::cout<<std::endl;

@@ -17,7 +17,6 @@ HiddenLayer::~HiddenLayer(){
 //HiddenLayer::~HiddenLayer(){}
 
 void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2, const mtk::MatrixXf *w2){
-	int u1_size = u1.getRows() * u1.getCols();
 	const float one = 1.0f,zero = 0.0f;
 	//deviceMap<dActReLU><<<BLOCKS,threads_ceildiv(u1.getSize(),BLOCKS)>>>(u1.getDevicePointer(),u1.getDevicePointer(),u1.getSize());
 	mtk::MatrixFunction::map<dActReLU>(u1,u1);

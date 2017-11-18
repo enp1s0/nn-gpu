@@ -98,7 +98,7 @@ void BaseLayer::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf
 }
 
 void BaseLayer::learningReflect(){
-	const float one = 1.0f;//,zero = 0.0f;
+	const float one = 1.0f;
 	const float minus_learning_rate = -learning_rate;
 	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_w1,rdw1,rdw1,1.0f,1.0f);
 	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_b1,rdb1,rdb1,1.0f,1.0f);
@@ -120,9 +120,10 @@ void BaseLayer::learningReflect(){
 				&one,
 				db1.getDevicePointer(),1,
 				b1.getDevicePointer(),1) );
-	/*
+	
 	// 重みが大きくなりすぎないように
-	int max_w_index = 0;
+	/*int max_w_index = 0;
+	float zero = 0.0f;
 	// 絶対値が最大の要素のindexを返す
 	CUBLAS_HANDLE_ERROR( cublasIsamax( cublas,w1.getSize(),
 				w1.getDevicePointer(),1,&max_w_index) );
@@ -133,13 +134,15 @@ void BaseLayer::learningReflect(){
 				all1_o.getDevicePointer(),1,
 				&zero,
 				max_b_i.getDevicePointer(),1));
+	//max_b_i.allocateHost()->copyToHost()->print("test : " + std::to_string(max_w_index));
 	//deviceMap<MaxAndInverse><<<BLOCKS,threads_ceildiv(max_b_i.getSize(),BLOCKS)>>>(max_b_i.getDevicePointer(),max_b_i.getDevicePointer(),1.0f,max_b_i.getSize());
 	mtk::MatrixFunction::map<MaxAndInverse>(max_b_i,max_b_i,1.0f);
+	//max_b_i.copyToHost()->print("test : " + std::to_string(max_w_index));
 	CUBLAS_HANDLE_ERROR( cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				output_size,input_size,1,
 				&one,
 				max_b_i.getDevicePointer(),output_size,
-				all1_i.getDevicePointer(),input_size,
+				all1_i.getDevicePointer(),1,
 				&zero,
 				max_w_i.getDevicePointer(),max_w_i.getRows()));
 	// 正規化

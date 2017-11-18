@@ -10,7 +10,7 @@ const int input_size = 28 * 28;
 const int layer0_output_size = 15 * 15;
 const int layer1_output_size = 10;
 const int batch_size = 16;
-const int calc = 1;
+const int calc = 10000;
 const int test_interval = 500;
 
 int main(){
@@ -31,7 +31,7 @@ int main(){
 	mtk::MatrixXf input_error,hidden0_error,output_error;
 	input_error.setSize(layer0_output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	hidden0_error.setSize(layer1_output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
-	output_error.setSize(layer1_output_size,batch_size)->allocateDevice()->initDeviceConstant(1.0f);
+	output_error.setSize(layer1_output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 
 	// teacher
 	mtk::MatrixXf teacher;
@@ -59,13 +59,13 @@ int main(){
 					output_error.getDevicePointer(),1));
 		// 逆方向計算
 		layer1.learningBackPropagation(	hidden0_error, output_error);
-		//layer0.learningBackPropagation( input_error, hidden0_error, layer1.getWeightPointer());
+		layer0.learningBackPropagation( input_error, hidden0_error, layer1.getWeightPointer());
 		// 反映
-		/*layer0.learningReflect();
+		layer0.learningReflect();
 		layer1.learningReflect();
-		if((c+1)%test_interval == 0){std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;}*/
+		if((c+1)%test_interval == 0){std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;}
 	}
-	output.allocateHost()->copyToHost()->print("output");
+	output.copyToHost()->print("output");
 	output_error.allocateHost()->copyToHost()->print("output error");
 	std::cout<<"Done"<<std::endl;
 	CUBLAS_HANDLE_ERROR(cublasDestroy( cublas));

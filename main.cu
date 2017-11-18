@@ -61,7 +61,7 @@ int main(){
 		layer1.learningBackPropagation(	hidden0_error, output_error);
 		layer0.learningBackPropagation( input_error, hidden0_error, layer1.getWeightPointer());
 		// 反映
-	/layer0.learningReflect();
+		layer0.learningReflect();
 		layer1.learningReflect();
 		if((c+1)%test_interval == 0){std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;}
 	}

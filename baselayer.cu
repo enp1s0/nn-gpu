@@ -98,13 +98,13 @@ void BaseLayer::learningReflect(){
 	const float one = 1.0f,zero = 0.0f;
 	const float minus_learning_rate = -learning_rate;
 	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
-				rdw1.getCols()*rdw1.getRows(),0,&one,
+				rdw1.getSize(),0,&one,
 				rdw1.getDevicePointer(),1,
 				rdw1.getDevicePointer(),1,
 				&one,
 				adagrad_w1.getDevicePointer(),1) );
 	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
-				rdb1.getCols()*rdb1.getRows(),0,&one,
+				rdb1.getSize(),0,&one,
 				rdb1.getDevicePointer(),1,
 				rdb1.getDevicePointer(),1,
 				&one,
@@ -113,7 +113,7 @@ void BaseLayer::learningReflect(){
 	//deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_w1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_w1.getSize());
 	mtk::MatrixFunction::map<AdagradMake>(adagrad_w1,adagrad_w1,adagrad_epsilon);
 	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
-				rdw1.getCols() * rdw1.getRows(),0,
+				rdw1.getSize(),0,
 				&minus_learning_rate,
 				rdw1.getDevicePointer(),1,
 				adagrad_w1.getDevicePointer(),1,
@@ -123,7 +123,7 @@ void BaseLayer::learningReflect(){
 	//deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_b1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_b1.getSize());
 	mtk::MatrixFunction::map<AdagradMake>(adagrad_b1,adagrad_b1,adagrad_epsilon);
 	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
-				rdb1.getCols() * rdb1.getRows(),0,
+				rdb1.getSize(),0,
 				&minus_learning_rate,
 				rdb1.getDevicePointer(),1,
 				adagrad_b1.getDevicePointer(),1,

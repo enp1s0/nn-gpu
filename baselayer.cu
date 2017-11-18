@@ -5,7 +5,6 @@
 #include <iostream>
 
 using namespace mtk;
-const int BLOCKS = 1 << 7;
 template<class T>
 __global__ void deviceMap(float *device_ptr_dst,float* device_ptr_src,float a,int max_t){
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
@@ -111,7 +110,8 @@ void BaseLayer::learningReflect(){
 				&one,
 				adagrad_b1.getDevicePointer(),1) );
 	// dw1を作る
-	deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_w1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_w1.getSize());
+	//deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_w1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_w1.getSize());
+	mtk::MatrixFunction::map<AdagradMake>(adagrad_w1,adagrad_w1,adagrad_epsilon);
 	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
 				rdw1.getCols() * rdw1.getRows(),0,
 				&minus_learning_rate,
@@ -120,12 +120,13 @@ void BaseLayer::learningReflect(){
 				&attenuation_rate,
 				dw1.getDevicePointer(),1));
 	// db1を作る
-	deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_b1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_b1.getSize());
+	//deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_b1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_b1.getSize());
+	mtk::MatrixFunction::map<AdagradMake>(adagrad_b1,adagrad_b1,adagrad_epsilon);
 	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
 				rdb1.getCols() * rdb1.getRows(),0,
 				&minus_learning_rate,
 				rdb1.getDevicePointer(),1,
-				adagrad_w1.getDevicePointer(),1,
+				adagrad_b1.getDevicePointer(),1,
 				&attenuation_rate,
 				db1.getDevicePointer(),1));
 
@@ -150,7 +151,8 @@ void BaseLayer::learningReflect(){
 				all1_o.getDevicePointer(),1,
 				&zero,
 				max_b_i.getDevicePointer(),1));
-	deviceMap<MaxAndInverse><<<BLOCKS,threads_ceildiv(max_b_i.getSize(),BLOCKS)>>>(max_b_i.getDevicePointer(),max_b_i.getDevicePointer(),1.0f,max_b_i.getSize());
+	//deviceMap<MaxAndInverse><<<BLOCKS,threads_ceildiv(max_b_i.getSize(),BLOCKS)>>>(max_b_i.getDevicePointer(),max_b_i.getDevicePointer(),1.0f,max_b_i.getSize());
+	mtk::MatrixFunction::map<MaxAndInverse>(max_b_i,max_b_i,1.0f);
 	CUBLAS_HANDLE_ERROR( cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				output_size,input_size,1,
 				&one,

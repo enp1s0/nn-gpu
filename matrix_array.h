@@ -16,13 +16,13 @@ namespace mtk{
 		int getSize() const;
 		float* getDevicePointer() const;
 		float* getHostPointer() const ;
-		void copyToDevice();
-		void copyToHost();
-		void copyTo(MatrixXf& dest_matrix) const;
-		void copyTo(float* dest_ptr) const;
+		MatrixXf* copyToDevice();
+		MatrixXf* copyToHost();
+		MatrixXf* copyTo(MatrixXf& dest_matrix) ;
+		MatrixXf* copyTo(float* dest_ptr) ;
 		void operator=(const MatrixXf m);
-		void initDeviceRandom(float min,float max);
-		void initDeviceConstant(float f);
-		void print(std::string label="") const;
+		MatrixXf* initDeviceRandom(float min,float max);
+		MatrixXf* initDeviceConstant(float f);
+		MatrixXf* print(std::string label="") ;
 	};
 }

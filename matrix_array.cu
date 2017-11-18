@@ -11,20 +11,25 @@ using namespace mtk;
 const int BLOCKS = 1 << 7;
 
 
-__global__ void deviceSetConstant(float *device_ptr,float f,int max_t){
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
-	if(max_t <= tid)
-		return;
-	device_ptr[tid] = f;
+__global__ void deviceSetConstant(float *device_ptr,float f,int w,int max_t){
+	int tid = (threadIdx.x + blockIdx.x * blockDim.x)*w;
+	for(int i = 0;i < w;i++){
+		if(max_t <= tid)
+			return;
+		device_ptr[tid] = f;
+		tid++;
+	}
 }
-__global__ void deviceSetRandom(float *device_ptr,float min,float max,int seed,int max_t){
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
-	if(max_t <= tid)
-		return;
-	
+__global__ void deviceSetRandom(float *device_ptr,float min,float max,int seed,int w,int max_t){
+	int tid = (threadIdx.x + blockIdx.x * blockDim.x)*w;
 	curandState s;
 	curand_init(seed,tid,0,&s);
-	device_ptr[tid] = curand_uniform(&s) * (max - min) + min;
+	for(int i = 0;i < w;i++){
+		if(max_t <= tid)
+			return;
+		device_ptr[tid] = curand_uniform(&s) * (max - min) + min;
+		tid++;
+	}
 }
 __global__ void deviceCopy(float* device_ptr_dst,float* device_ptr_src,int max_t){
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
@@ -64,19 +69,23 @@ MatrixXf* MatrixXf::allocateHost(){
 }
 
 
-void MatrixXf::copyToDevice(){
+MatrixXf* MatrixXf::copyToDevice(){
 	CUDA_HANDLE_ERROR( cudaMemcpy( device_ptr, host_ptr, sizeof(float) * rows * cols, cudaMemcpyHostToDevice ) );
+	return this;
 }
 
-void MatrixXf::copyToHost(){
+MatrixXf* MatrixXf::copyToHost(){
 	CUDA_HANDLE_ERROR( cudaMemcpy( host_ptr, device_ptr, sizeof(float) * rows * cols, cudaMemcpyDeviceToHost ) );
+	return this;
 }
 
-void MatrixXf::copyTo(float* dst_ptr)const{
+MatrixXf* MatrixXf::copyTo(float* dst_ptr){
 	deviceCopy<<<BLOCKS,(rows*cols+BLOCKS-1)/BLOCKS>>>(dst_ptr,device_ptr,rows*cols);
+	return this;
 }
-void MatrixXf::copyTo(mtk::MatrixXf& matrix)const{
+MatrixXf* MatrixXf::copyTo(mtk::MatrixXf& matrix){
 	copyTo(matrix.getDevicePointer());
+	return this;
 }
 
 
@@ -93,22 +102,29 @@ void MatrixXf::operator=(MatrixXf m){
 	this->rows = m.getRows();
 }
 
-void MatrixXf::initDeviceConstant(float f){
-	deviceSetConstant<<<BLOCKS,(rows*cols+BLOCKS-1)/BLOCKS>>>(device_ptr,f,rows*cols);
+MatrixXf* MatrixXf::initDeviceConstant(float f){
+	deviceSetConstant<<<BLOCKS,std::min(512,threads_ceildiv(rows*cols,BLOCKS))>>>(device_ptr,f,(threads_ceildiv(rows*cols,BLOCKS)+511)/512,rows*cols);
+	CUDA_HANDLE_ERROR(cudaDeviceSynchronize());
+	return this;
 }
 
-void MatrixXf::initDeviceRandom(float min,float max){
+MatrixXf* MatrixXf::initDeviceRandom(float min,float max){
 	std::random_device random;
-	deviceSetRandom<<<BLOCKS,(rows*cols+BLOCKS-1)/BLOCKS>>>(device_ptr,min,max,random(),rows*cols);
+	deviceSetRandom<<<BLOCKS,std::min(512,threads_ceildiv(rows*cols,BLOCKS))>>>(device_ptr,min,max,random(),(threads_ceildiv(rows*cols,BLOCKS)+511)/512,rows*cols);
+	//CUDA_HANDLE_ERROR(cudaPeekAtLastError());
+	CUDA_HANDLE_ERROR(cudaDeviceSynchronize());
+	return this;
 }
 
-void MatrixXf::print(std::string label)const{
+MatrixXf* MatrixXf::print(std::string label){
 	if(label.compare("") != 0)
 		std::cout<<label<<" = "<<std::endl;
 	for(int i = 0;i < rows;i++){
 		for(int j = 0;j < cols;j++){
-			std::cout<<std::setw(4)<<host_ptr[j * rows + i]<<" ";
+			printf("%.4f ",host_ptr[j * rows + i]);
+			//std::cout<<std::setw(5)<<host_ptr[j * rows + i]<<" ";
 		}
 		std::cout<<std::endl;
 	}
+	return this;
 }

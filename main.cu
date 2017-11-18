@@ -10,7 +10,7 @@ const int input_size = 28 * 28;
 const int layer0_output_size = 15 * 15;
 const int layer1_output_size = 10;
 const int batch_size = 16;
-const int calc = 10000;
+const int calc = 2;
 const int test_interval = 500;
 
 int main(){
@@ -61,7 +61,7 @@ int main(){
 		layer1.learningBackPropagation(	hidden0_error, output_error);
 		layer0.learningBackPropagation( input_error, hidden0_error, layer1.getWeightPointer());
 		// 反映
-		layer0.learningReflect();
+	/layer0.learningReflect();
 		layer1.learningReflect();
 		if((c+1)%test_interval == 0){std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;}
 	}

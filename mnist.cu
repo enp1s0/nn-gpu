@@ -123,7 +123,20 @@ int MNISTLoader::loadMNISTTrainData(std::string image_filename,std::string label
 	return res;
 }
 int MNISTLoader::loadMNISTTestData(std::string image_filename,std::string label_filename){
-	return this->loadMNISTData(image_filename,label_filename,test_data_vector);
+	test_image_data.setSize(28*28,test_data_amount)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
+	test_label_data.setSize(10,test_data_amount)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
+	int res = this->loadMNISTData(image_filename,label_filename,test_data_vector);
+	for(int i = 0;i < test_data_amount;i++){
+		MNISTData* data = test_data_vector[i];
+		for(int j = 0;j < data_dim*data_dim;j++){
+			test_image_data.getHostPointer()[j + i * 28 * 28] = data->data[j];
+		}
+		test_label_data.getHostPointer()[data->label + i * 10] = 1.0f;
+		//teacher(data->label,i) = 1.0f;
+	}
+	test_image_data.copyToDevice();
+	test_label_data.copyToDevice();
+	return res;
 }
 
 MNISTLoader::~MNISTLoader(){

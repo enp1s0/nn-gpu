@@ -41,7 +41,7 @@ void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::
 			output_size,1,batch_size,
 			&alpha,
 			next_error.getDevicePointer(),next_error.getRows(),
-			all1_b.getDevicePointer(),z0.getRows(),
+			all1_b.getDevicePointer(),batch_size,
 			&zero,
 			rdb1.getDevicePointer(),rdb1.getRows()));
 }

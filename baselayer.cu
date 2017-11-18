@@ -33,9 +33,11 @@ public:
 BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
 	input_size(input_size),output_size(output_size),batch_size(batch_size),layer_name(layer_name),cublas(cublas),learning_rate(learning_rate),adagrad_epsilon(adagrad_epsilon),attenuation_rate(attenuation_rate)
 {
+	//w1.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
 	w1.setSize(output_size,input_size)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
 	dw1.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
 	rdw1.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
+	//b1.setSize(output_size,1)->allocateDevice()->initDeviceConstant(1.0f);
 	b1.setSize(output_size,1)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
 	db1.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
 	rdb1.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
@@ -46,12 +48,17 @@ BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string l
 	all1_b.setSize(1,batch_size)->allocateDevice()->initDeviceConstant(1.0f);
 	all1_o.setSize(1,output_size)->allocateDevice()->initDeviceConstant(1.0f);
 	all1_i.setSize(1,input_size)->allocateDevice()->initDeviceConstant(1.0f);
-	u.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
-	max_b_i.setSize(output_size,1)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
-	max_w_i.setSize(output_size,input_size)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
+	u.setSize(output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
+	//max_b_i.setSize(output_size,1)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
+	//max_w_i.setSize(output_size,input_size)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
+	max_b_i.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
+	max_w_i.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
 	b1_tmp.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
 	w1_tmp.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
 	std::cout<<layer_name<<"("<<input_size<<","<<output_size<<","<<batch_size<<")"<<std::endl;
+	std::cout<<" - learning rate = "<<learning_rate<<std::endl;
+	std::cout<<" - adagrad epsilon = "<<adagrad_epsilon<<std::endl;
+	std::cout<<" - momentum rate = "<<attenuation_rate<<std::endl;
 }
 
 BaseLayer::~BaseLayer(){}
@@ -62,15 +69,15 @@ void BaseLayer::learningForwardPropagation(mtk::MatrixXf &output,const mtk::Matr
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,batch_size,1,
 			&one,
-			b1.getDevicePointer(),output_size,
+			b1.getDevicePointer(),b1.getRows(),
 			all1_b.getDevicePointer(),1,
 			&zero,
-			u1.getDevicePointer(),output_size));
+			u1.getDevicePointer(),u1.getRows()));
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,batch_size,input_size,
 			&one,
-			w1.getDevicePointer(),output_size,
-			input.getDevicePointer(),input_size,
+			w1.getDevicePointer(),w1.getRows(),
+			input.getDevicePointer(),input.getRows(),
 			&one,
 			u1.getDevicePointer(),output_size));
 	this->activation(output,u1);
@@ -97,12 +104,12 @@ void BaseLayer::learningReflect(){
 	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_b1,rdb1,rdb1,1.0f,1.0f);
 	// dw1を作る
 	//deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_w1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_w1.getSize());
-	mtk::MatrixFunction::map<AdagradMake>(adagrad_w1,adagrad_w1,adagrad_epsilon);
-	mtk::MatrixFunction::elementwiseProduct(cublas,dw1,rdw1,adagrad_w1,minus_learning_rate,attenuation_rate);
+	mtk::MatrixFunction::map<AdagradMake>(w1_tmp,adagrad_w1,adagrad_epsilon);
+	mtk::MatrixFunction::elementwiseProduct(cublas,dw1,rdw1,w1_tmp,minus_learning_rate,attenuation_rate);
 	// db1を作る
 	//deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_b1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_b1.getSize());
-	mtk::MatrixFunction::map<AdagradMake>(adagrad_b1,adagrad_b1,adagrad_epsilon);
-	mtk::MatrixFunction::elementwiseProduct(cublas,db1,rdb1,adagrad_b1,minus_learning_rate,attenuation_rate);
+	mtk::MatrixFunction::map<AdagradMake>(b1_tmp,adagrad_b1,adagrad_epsilon);
+	mtk::MatrixFunction::elementwiseProduct(cublas,db1,rdb1,b1_tmp,minus_learning_rate,attenuation_rate);
 
 	// 更新
 	CUBLAS_HANDLE_ERROR( cublasSaxpy( cublas, w1.getSize(),

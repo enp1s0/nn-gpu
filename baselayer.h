@@ -26,7 +26,7 @@ namespace mtk{
 		mtk::MatrixXf all1_b; // 1がbatch_size個
 		mtk::MatrixXf all1_o; // 1がoutput_size個
 		mtk::MatrixXf all1_i; // 1がinput_size個
-		mtk::MatrixXf u; // testForwardPropagateで使用
+		mtk::MatrixXf u; // back propagatinで使用
 		mtk::MatrixXf max_b_i; //重みが大きくなりすぎないようにするときに必要
 		mtk::MatrixXf max_w_i; //重みが大きくなりすぎないようにするときに必要
 		mtk::MatrixXf w1_tmp;

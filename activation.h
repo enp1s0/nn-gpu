@@ -15,13 +15,13 @@ namespace mtk{
 	class ActReLU{
 	public:
 		__device__ float operator()(float a) const{
-			return (a>0)?a:0.0f;
+			return (a>0.0f)?a:0.0f;
 		}
 	};
 	class dActReLU{
 	public:
 		__device__ float operator()(float a) const{
-			return (a>0)?1:0;
+			return (a>0.0f)?1.0f:0.0f;
 		}
 	};
 }

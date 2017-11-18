@@ -6,24 +6,6 @@
 
 using namespace mtk;
 
-const int BLOCKS = 1 << 7;
-
-template<class T>
-__global__ void deviceMap(float *device_ptr_dst,float* device_ptr_src,int max_t){
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
-	if(max_t <= tid)
-		return;
-	device_ptr_dst[tid] = T()(device_ptr_src[tid]);
-}
-__global__ void devicePointwiseProduct(float *device_ptr_dst,float* device_ptr_src0,float* device_ptr_src1,int max_t){
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
-	if(max_t <= tid)
-		return;
-	device_ptr_dst[tid] = device_ptr_src0[tid] * device_ptr_src1[tid];
-}
-
-
-
 
 HiddenLayer::HiddenLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float annuation_rate):
 	BaseLayer(input_size,output_size,batch_size,layer_name,cublas,learning_rate,adagrad_epsilon,annuation_rate)
@@ -37,7 +19,8 @@ HiddenLayer::~HiddenLayer(){
 void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2, const mtk::MatrixXf *w2){
 	int u1_size = u1.getRows() * u1.getCols();
 	const float one = 1.0f,zero = 0.0f;
-	deviceMap<dActReLU><<<BLOCKS,threads_ceildiv(u1.getSize(),BLOCKS)>>>(u1.getDevicePointer(),u1.getDevicePointer(),u1.getSize());
+	//deviceMap<dActReLU><<<BLOCKS,threads_ceildiv(u1.getSize(),BLOCKS)>>>(u1.getDevicePointer(),u1.getDevicePointer(),u1.getSize());
+	mtk::MatrixFunction::map<dActReLU>(u1,u1);
 	CUDA_HANDLE_ERROR(cudaDeviceSynchronize());
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_T,CUBLAS_OP_N,
 			u.getRows(),u.getCols(),d2.getRows(),
@@ -64,6 +47,19 @@ void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::
 			rdb1.getDevicePointer(),rdb1.getRows()));
 }
 
-void HiddenLayer::activation(mtk::MatrixXf &output, const mtk::MatrixXf &input) const {
-	deviceMap<dActReLU><<<BLOCKS,threads_ceildiv(input.getSize(),BLOCKS)>>>(output.getDevicePointer(),input.getDevicePointer(),input.getSize());
+class Poi{
+public:
+	__device__ float operator()(float a){
+		return 1.0f;
+	}
+};
+
+class Exp{
+public:
+	__device__ float operator()(float a) const{
+		return expf(a);
+	}
+};
+void HiddenLayer::activation(mtk::MatrixXf &output, const mtk::MatrixXf &input) {
+	mtk::MatrixFunction::map<ActReLU>(output,input);
 }

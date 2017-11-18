@@ -47,13 +47,11 @@ BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string l
 	all1_o.setSize(1,output_size)->allocateDevice()->initDeviceConstant(1.0f);
 	all1_i.setSize(1,input_size)->allocateDevice()->initDeviceConstant(1.0f);
 	u.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
-	max_b_i.setSize(output_size,1)->allocateDevice()->initDeviceConstant(1.0f);
-	max_w_i.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(1.0f);
+	max_b_i.setSize(output_size,1)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
+	max_w_i.setSize(output_size,input_size)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
 	b1_tmp.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
 	w1_tmp.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
 	std::cout<<layer_name<<"("<<input_size<<","<<output_size<<","<<batch_size<<")"<<std::endl;
-	//w1.allocateHost()->copyToHost();
-	//w1.print();
 }
 
 BaseLayer::~BaseLayer(){}
@@ -81,9 +79,7 @@ void BaseLayer::learningForwardPropagation(mtk::MatrixXf &output,const mtk::Matr
 void BaseLayer::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
 	const float one = 1.0f;
 	//b1.copyTo(u);
-	CUBLAS_HANDLE_ERROR(cublasScopy(cublas,b1.getCols()*b1.getRows(),
-			b1.getDevicePointer(),1,
-			u.getDevicePointer(),1));
+	mtk::MatrixFunction::copy(cublas,u,b1);
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,1,input_size,
 			&one,
@@ -95,54 +91,33 @@ void BaseLayer::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf
 }
 
 void BaseLayer::learningReflect(){
-	const float one = 1.0f,zero = 0.0f;
+	const float one = 1.0f;//,zero = 0.0f;
 	const float minus_learning_rate = -learning_rate;
-	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
-				rdw1.getSize(),0,&one,
-				rdw1.getDevicePointer(),1,
-				rdw1.getDevicePointer(),1,
-				&one,
-				adagrad_w1.getDevicePointer(),1) );
-	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
-				rdb1.getSize(),0,&one,
-				rdb1.getDevicePointer(),1,
-				rdb1.getDevicePointer(),1,
-				&one,
-				adagrad_b1.getDevicePointer(),1) );
+	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_w1,rdw1,rdw1,1.0f,1.0f);
+	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_b1,rdb1,rdb1,1.0f,1.0f);
 	// dw1を作る
 	//deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_w1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_w1.getSize());
 	mtk::MatrixFunction::map<AdagradMake>(adagrad_w1,adagrad_w1,adagrad_epsilon);
-	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
-				rdw1.getSize(),0,
-				&minus_learning_rate,
-				rdw1.getDevicePointer(),1,
-				adagrad_w1.getDevicePointer(),1,
-				&attenuation_rate,
-				dw1.getDevicePointer(),1));
+	mtk::MatrixFunction::elementwiseProduct(cublas,dw1,rdw1,adagrad_w1,minus_learning_rate,attenuation_rate);
 	// db1を作る
 	//deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_b1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_b1.getSize());
 	mtk::MatrixFunction::map<AdagradMake>(adagrad_b1,adagrad_b1,adagrad_epsilon);
-	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
-				rdb1.getSize(),0,
-				&minus_learning_rate,
-				rdb1.getDevicePointer(),1,
-				adagrad_b1.getDevicePointer(),1,
-				&attenuation_rate,
-				db1.getDevicePointer(),1));
+	mtk::MatrixFunction::elementwiseProduct(cublas,db1,rdb1,adagrad_b1,minus_learning_rate,attenuation_rate);
 
 	// 更新
-	CUBLAS_HANDLE_ERROR( cublasSaxpy( cublas, w1.getRows() * w1.getCols(),
+	CUBLAS_HANDLE_ERROR( cublasSaxpy( cublas, w1.getSize(),
 				&one,
 				dw1.getDevicePointer(),1,
 				w1.getDevicePointer(),1) );
-	CUBLAS_HANDLE_ERROR( cublasSaxpy( cublas, b1.getRows() * b1.getCols(),
+	CUBLAS_HANDLE_ERROR( cublasSaxpy( cublas, b1.getSize(),
 				&one,
 				db1.getDevicePointer(),1,
 				b1.getDevicePointer(),1) );
-
+	/*
 	// 重みが大きくなりすぎないように
 	int max_w_index = 0;
-	CUBLAS_HANDLE_ERROR( cublasIsamax( cublas,w1.getRows()*w1.getCols(),
+	// 絶対値が最大の要素のindexを返す
+	CUBLAS_HANDLE_ERROR( cublasIsamax( cublas,w1.getSize(),
 				w1.getDevicePointer(),1,&max_w_index) );
 	CUBLAS_HANDLE_ERROR( cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				1,output_size,1,
@@ -159,31 +134,13 @@ void BaseLayer::learningReflect(){
 				max_b_i.getDevicePointer(),output_size,
 				all1_i.getDevicePointer(),input_size,
 				&zero,
-				max_w_i.getDevicePointer(),output_size));
+				max_w_i.getDevicePointer(),max_w_i.getRows()));
 	// 正規化
-	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas, CUBLAS_FILL_MODE_LOWER,
-				max_w_i.getCols() * max_w_i.getRows(),0,
-				&one,
-				max_w_i.getDevicePointer(),1,
-				w1.getDevicePointer(),1,
-				&zero,
-				w1_tmp.getDevicePointer(),1));
-	CUBLAS_HANDLE_ERROR( cublasSsbmv(cublas, CUBLAS_FILL_MODE_LOWER,
-				max_b_i.getCols() * max_b_i.getRows(),0,
-				&one,
-				max_b_i.getDevicePointer(),1,
-				b1.getDevicePointer(),1,
-				&zero,
-				b1_tmp.getDevicePointer(),1));
-
-
+	mtk::MatrixFunction::elementwiseProduct(cublas,w1_tmp,max_w_i,w1);
+	mtk::MatrixFunction::elementwiseProduct(cublas,b1_tmp,max_b_i,b1);
 	// 結果をコピー
-	CUBLAS_HANDLE_ERROR( cublasScopy( cublas, w1.getRows()*w1.getCols(),
-				w1_tmp.getDevicePointer(),1,
-				w1.getDevicePointer(),1) );
-	CUBLAS_HANDLE_ERROR( cublasScopy( cublas, b1.getRows()*b1.getCols(),
-				b1_tmp.getDevicePointer(),1,
-				b1.getDevicePointer(),1) );
+	mtk::MatrixFunction::copy(cublas,w1,w1_tmp);
+	mtk::MatrixFunction::copy(cublas,b1,b1_tmp);*/
 }
 
 mtk::MatrixXf* BaseLayer::getWeightPointer(){return &w1;}

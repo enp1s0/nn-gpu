@@ -9,9 +9,9 @@
 const int input_size = 28 * 28;
 const int layer0_output_size = 15 * 15;
 const int layer1_output_size = 10;
-const int batch_size = 16;
-const int calc = 2;
-const int test_interval = 500;
+const int batch_size = 32;
+const int calc = 600;
+const int test_interval = 40;
 
 int main(){
 	cublasHandle_t cublas;
@@ -65,6 +65,7 @@ int main(){
 		layer1.learningReflect();
 		if((c+1)%test_interval == 0){std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;}
 	}
+	hidden0.allocateHost()->copyToHost()->print("hidden");
 	output.copyToHost()->print("output");
 	output_error.allocateHost()->copyToHost()->print("output error");
 	std::cout<<"Done"<<std::endl;

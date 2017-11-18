@@ -3,7 +3,6 @@
 #include "cuda_common.h"
 
 using namespace mtk;
-const int BLOCKS = 1 << 7;
 
 template<class T>
 __global__ void deviceMap(float *device_ptr_dst,float* device_ptr_src,int max_t){
@@ -41,7 +40,7 @@ void SoftmaxLayer::learningBackPropagation(mtk::MatrixXf& next_error,const mtk::
 	mtk::MatrixFunction::copy(cublas,d1,d2);
 }
 
-void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)const {
+void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input){
 	//input行列の0行目を取り出す
 	const float one = 1.0f,minus_one = -1.0f,zero = 0.0f;
 	mtk::MatrixFunction::copy(cublas,output,input);
@@ -59,7 +58,7 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 				input_row_0.getDevicePointer(),1,
 				&one,
 				output.getDevicePointer(),output_size) );
-	deviceMap<Exp><<<BLOCKS,threads_ceildiv(output.getSize(),BLOCKS)>>>(output.getDevicePointer(),output.getDevicePointer(),output.getSize());
+	mtk::MatrixFunction::map<Exp>(output,output);
 	// 和を取る
 	CUBLAS_HANDLE_ERROR( cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				1,batch_size,output_size,
@@ -69,7 +68,8 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 				&zero,
 				input_row_0.getDevicePointer(),1));
 	// 逆数を計算
-	deviceMap<Inverse><<<BLOCKS,threads_ceildiv(input_row_0.getSize(),BLOCKS)>>>(input_row_0.getDevicePointer(),input_row_0.getDevicePointer(),input_row_0.getSize());
+	//deviceMap<Inverse><<<BLOCKS,threads_ceildiv(input_row_0.getSize(),BLOCKS)>>>(input_row_0.getDevicePointer(),input_row_0.getDevicePointer(),input_row_0.getSize());
+	mtk::MatrixFunction::map<Inverse>(input_row_0,input_row_0);
 	// 逆数の行列を計算
 	CUBLAS_HANDLE_ERROR( cublasSgemm( cublas, CUBLAS_OP_N,CUBLAS_OP_N,
 				output_size,batch_size,1,
@@ -78,12 +78,12 @@ void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input)c
 				input_row_0.getDevicePointer(),1,
 				&zero,
 				inverse.getDevicePointer(),output_size) );
-	
-	CUBLAS_HANDLE_ERROR(cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
+	mtk::MatrixFunction::elementwiseProduct(cublas,output0,output,inverse);
+	/*CUBLAS_HANDLE_ERROR(cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
 			inverse.getCols()*inverse.getRows(),0,&one,
 			inverse.getDevicePointer(),1,
 			output.getDevicePointer(),1,
-			&zero,output0.getDevicePointer(),1));
+			&zero,output0.getDevicePointer(),1));*/
 	mtk::MatrixFunction::copy(cublas,output,output0);
 	/*CUBLAS_HANDLE_ERROR( cublasScopy(cublas,output0.getRows()*output0.getCols(),
 				output0.getDevicePointer(),1,

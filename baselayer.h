@@ -32,7 +32,7 @@ namespace mtk{
 		mtk::MatrixXf w1_tmp;
 		mtk::MatrixXf b1_tmp;
 
-		virtual void activation(mtk::MatrixXf& output,const mtk::MatrixXf& input) const = 0;
+		virtual void activation(mtk::MatrixXf& output,const mtk::MatrixXf& input) = 0;
 	public:
 		BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate);
 		~BaseLayer();

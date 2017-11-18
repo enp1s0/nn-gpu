@@ -27,12 +27,13 @@ namespace mtk {
 		template<class T>
 			static void map(mtk::MatrixXf& output,const mtk::MatrixXf& input){
 				const int BLOCKS = 1 << 7;
-				mtk_hidden::deviceMap<T><<<BLOCKS,threads_ceildiv(input.getSize(),BLOCKS)>>>(input.getDevicePointer(),input.getDevicePointer(),input.getSize());
+				mtk_hidden::deviceMap<T><<<BLOCKS,threads_ceildiv(input.getSize(),BLOCKS)>>>(output.getDevicePointer(),input.getDevicePointer(),input.getSize());
+				//CUDA_HANDLE_ERROR(cudaPeekAtLastError());
 			}
 		template<class T>
 			static void map(mtk::MatrixXf& output,const mtk::MatrixXf& input,float a){
 				const int BLOCKS = 1 << 7;
-				mtk_hidden::deviceMap<T><<<BLOCKS,threads_ceildiv(input.getSize(),BLOCKS)>>>(input.getDevicePointer(),input.getDevicePointer(),a,input.getSize());
+				mtk_hidden::deviceMap<T><<<BLOCKS,threads_ceildiv(input.getSize(),BLOCKS)>>>(output.getDevicePointer(),input.getDevicePointer(),a,input.getSize());
 			}
 	};
 }

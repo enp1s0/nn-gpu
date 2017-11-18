@@ -85,7 +85,6 @@ void BaseLayer::learningForwardPropagation(mtk::MatrixXf &output,const mtk::Matr
 
 void BaseLayer::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
 	const float one = 1.0f;
-	//b1.copyTo(u);
 	mtk::MatrixFunction::copy(cublas,u,b1);
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,1,input_size,

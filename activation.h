@@ -15,7 +15,7 @@ namespace mtk{
 	class ActReLU{
 	public:
 		__device__ float operator()(float a) const{
-			return (a>0)?a:0;
+			return (a>0)?a:0.0f;
 		}
 	};
 	class dActReLU{

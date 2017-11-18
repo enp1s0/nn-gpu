@@ -7,10 +7,10 @@
 #include "mnist.h"
 
 const int input_size = 28 * 28;
-const int layer0_output_size = 25 * 15;
+const int layer0_output_size = 15 * 15;
 const int layer1_output_size = 10;
 const int batch_size = 16;
-const int calc = 8000;
+const int calc = 1;
 const int test_interval = 500;
 
 int main(){
@@ -59,15 +59,14 @@ int main(){
 					output_error.getDevicePointer(),1));
 		// 逆方向計算
 		layer1.learningBackPropagation(	hidden0_error, output_error);
-		layer0.learningBackPropagation( input_error, hidden0_error, layer1.getWeightPointer());
+		//layer0.learningBackPropagation( input_error, hidden0_error, layer1.getWeightPointer());
 		// 反映
-		layer0.learningReflect();
+		/*layer0.learningReflect();
 		layer1.learningReflect();
-		if((c+1)%test_interval == 0){std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;}
+		if((c+1)%test_interval == 0){std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;}*/
 	}
-	output_error.allocateHost();
-	output_error.copyToHost();
-	output_error.print("output error");
+	output.allocateHost()->copyToHost()->print("output");
+	output_error.allocateHost()->copyToHost()->print("output error");
 	std::cout<<"Done"<<std::endl;
 	CUBLAS_HANDLE_ERROR(cublasDestroy( cublas));
 }

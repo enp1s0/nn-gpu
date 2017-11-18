@@ -2,6 +2,7 @@
 #include "matrix_function.h"
 #include "hyperparameter.h"
 #include "cuda_common.h"
+#include <iostream>
 
 using namespace mtk;
 const int BLOCKS = 1 << 7;
@@ -51,16 +52,16 @@ BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string l
 	max_w_i.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(1.0f);
 	b1_tmp.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
 	w1_tmp.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
+	std::cout<<layer_name<<"("<<input_size<<","<<output_size<<","<<batch_size<<")"<<std::endl;
+	//w1.allocateHost()->copyToHost();
+	//w1.print();
 }
 
 BaseLayer::~BaseLayer(){}
 
 void BaseLayer::learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf& input){
 	const float one = 1.0f,zero = 0.0f;
-	//input.copyTo(z0);
-	CUBLAS_HANDLE_ERROR(cublasScopy(cublas,input.getCols()*input.getRows(),
-			input.getDevicePointer(),1,
-			z0.getDevicePointer(),1));
+	mtk::MatrixFunction::copy(cublas, z0, input);
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,batch_size,1,
 			&one,
@@ -181,8 +182,6 @@ void BaseLayer::learningReflect(){
 	CUBLAS_HANDLE_ERROR( cublasScopy( cublas, b1.getRows()*b1.getCols(),
 				b1_tmp.getDevicePointer(),1,
 				b1.getDevicePointer(),1) );
-
-
 }
 
 mtk::MatrixXf* BaseLayer::getWeightPointer(){return &w1;}

@@ -1,6 +1,7 @@
 #include "hiddenlayer.h"
 #include "cuda_common.h"
 #include "activation.h"
+#include "matrix_function.h"
 #include <iostream>
 
 using namespace mtk;
@@ -26,7 +27,8 @@ __global__ void devicePointwiseProduct(float *device_ptr_dst,float* device_ptr_s
 
 HiddenLayer::HiddenLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float annuation_rate):
 	BaseLayer(input_size,output_size,batch_size,layer_name,cublas,learning_rate,adagrad_epsilon,annuation_rate)
-{}
+{
+}
 
 HiddenLayer::~HiddenLayer(){
 }
@@ -35,7 +37,7 @@ HiddenLayer::~HiddenLayer(){
 void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2, const mtk::MatrixXf *w2){
 	int u1_size = u1.getRows() * u1.getCols();
 	const float one = 1.0f,zero = 0.0f;
-	deviceMap<dActReLU><<<BLOCKS,(u1_size+BLOCKS-1)/BLOCKS>>>(u1.getDevicePointer(),u1.getDevicePointer(),u1_size);
+	deviceMap<dActReLU><<<BLOCKS,threads_ceildiv(u1.getSize(),BLOCKS)>>>(u1.getDevicePointer(),u1.getDevicePointer(),u1.getSize());
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_T,CUBLAS_OP_N,
 			output_size,batch_size,w2->getRows(),
 			&one,
@@ -43,12 +45,7 @@ void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::
 			d2.getDevicePointer(),d2.getRows(),
 			&zero,
 			u.getDevicePointer(),u.getRows()));
-	//devicePointwiseProduct<<<BLOCKS,(u1_size+BLOCKS-1)/BLOCKS>>>(next_error.getDevicePointer(),u.getDevicePointer(),u1.getDevicePointer(),u1_size);
-	CUBLAS_HANDLE_ERROR(cublasSsbmv(cublas,CUBLAS_FILL_MODE_LOWER,
-			u1_size,0,&one,
-			u.getDevicePointer(),1,
-			u1.getDevicePointer(),1,
-			&zero,next_error.getDevicePointer(),1));
+	mtk::MatrixFunction::elementwiseProduct(cublas,next_error,u,u1);
 	float alpha = 1.0f/batch_size;
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_T,
 			output_size,input_size,batch_size,
@@ -64,7 +61,6 @@ void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::
 			all1_b.getDevicePointer(),z0.getRows(),
 			&zero,
 			rdb1.getDevicePointer(),rdb1.getRows()));
-	
 }
 
 void HiddenLayer::activation(mtk::MatrixXf &output, const mtk::MatrixXf &input) const {

@@ -5,6 +5,7 @@
 #include "softmaxlayer.h"
 #include "matrix_function.h"
 #include "mnist.h"
+#include "cuda_event.h"
 
 const int input_size = 28 * 28;
 const int layer0_output_size = 15 * 15;
@@ -14,6 +15,12 @@ const int calc = 10000;
 const int test_interval = 1000;
 
 int main(){
+	mtk::CudaEvent event;
+	event.createEvent("init_start")
+		->createEvent("init_done")
+		->createEvent("calc_start")
+		->createEvent("calc_done");
+	event.recordEvent("init_start");
 	cublasHandle_t cublas;
 	CUBLAS_HANDLE_ERROR(cublasCreate(&cublas));
 
@@ -44,7 +51,9 @@ int main(){
 		std::cerr<<"invalid training file name"<<std::endl;
 		return 1;
 	}
-	std::cout<<"DONE"<<std::endl;
+	event.recordEvent("init_done");
+	event.recordEvent("calc_start");
+	std::cout<<"DONE : "<<event.elapsedTime("init_start","init_done")<<" [ms]"<<std::endl; 
 	std::cout<<"Start training"<<std::endl;
 	float minus_one = -1.0f;
 	for(int c = 0;c < calc;c++){
@@ -68,6 +77,7 @@ int main(){
 	//hidden0.allocateHost()->copyToHost()->print("hidden");
 	//output.copyToHost()->print("output");
 	//output_error.allocateHost()->copyToHost()->print("output error");
-	std::cout<<"Done"<<std::endl;
+	event.recordEvent("calc_done");
+	std::cout<<"Done : "<<event.elapsedTime("calc_start","calc_done")<<" [ms]"<<std::endl; 
 	CUBLAS_HANDLE_ERROR(cublasDestroy( cublas));
 }

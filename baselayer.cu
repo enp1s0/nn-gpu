@@ -26,7 +26,7 @@ class MaxAndInverse{
 public:
 	__device__ MaxAndInverse(float m):m(m){}
 	__device__ float operator() (float l) const{
-		return 1.0f/fmaxf(m,l);
+		return 1.0f/fmaxf(absf(m),l);
 	}
 };
 

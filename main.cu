@@ -11,8 +11,8 @@ const int input_size = 28 * 28;
 const int layer0_output_size = 15 * 15;
 const int layer1_output_size = 10;
 const int batch_size = 32;
-const int calc = 10000;
-const int test_interval = 1000;
+const int calc = 1000000;
+const int test_interval = 10000;
 
 int main(){
 	mtk::CudaEvent event;

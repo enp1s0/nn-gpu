@@ -8,4 +8,4 @@
 . /etc/profile.d/modules.sh
 module load cuda
 
-./exec
+./nn-gpu

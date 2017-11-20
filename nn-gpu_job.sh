@@ -6,4 +6,4 @@
 #PBS -m e
 cd ${PBS_O_WORKDIR}
 
-./exec
+./nn-gpu

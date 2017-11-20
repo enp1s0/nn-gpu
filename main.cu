@@ -10,11 +10,11 @@
 #include "aggregation.h"
 
 const int input_size = 28 * 28;
-const int network0_output_size = 30 * 15;
+const int network0_output_size = 15 * 15;
 const int network1_output_size = 10;
 const int batch_size = 128;
 const int calc = 10000;
-const int test_interval = 1000;
+const int test_interval = 100;
 
 const int test_batch_size = batch_size;
 
@@ -30,7 +30,7 @@ int main(){
 	CUBLAS_HANDLE_ERROR(cublasCreate(&cublas));
 
 	mtk::NeuralNetwork network(batch_size,cublas);
-	network.add(new mtk::HiddenNetwork(input_size,network0_output_size,batch_size,"first network",cublas))
+	network.add(new mtk::HiddenNetwork(input_size,network0_output_size,batch_size,"first network",cublas,0.2,1.0f,0.3f))
 		->add(new mtk::SoftmaxNetwork(network0_output_size,network1_output_size,batch_size,"second network",cublas))
 		->construct();
 	mtk::MatrixXf input,teacher,error,output;

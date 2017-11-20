@@ -1,4 +1,5 @@
 .*.swp
+nn-gpu
 exec
 obj/*.o
 log*

@@ -50,13 +50,17 @@ void mtk::Aggregation::compareWithTeacher(const mtk::MatrixXf& output,const mtk:
 				result.getDevicePointer(), 1,
 				all1_b.getDevicePointer(), 1,
 				&result_v ) );
+	CUDA_HANDLE_ERROR( cudaDeviceSynchronize() );
 	correct += (int)result_v;
 	all_test_size += output.getCols();
-	result.allocateHost()->copyToHost()->print("true|false");
+	//result.allocateHost()->copyToHost()->print("true|false");
 }
 
 float mtk::Aggregation::calcAccuracy() const{
-	return (float)correct/all_test_size;
+	if(all_test_size)
+		return (float)correct/all_test_size;
+	else
+		return 0;
 }
 
 

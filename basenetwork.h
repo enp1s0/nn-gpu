@@ -3,9 +3,9 @@
 #include "matrix_array.h"
 #include "cublas_common.h"
 namespace mtk{
-	class BaseLayer{
+	class BaseNetwork{
 	protected:
-		std::string layer_name;
+		std::string network_name;
 		int output_size,input_size;
 		int batch_size;
 		float attenuation_rate,learning_rate,adagrad_epsilon;
@@ -34,8 +34,8 @@ namespace mtk{
 
 		virtual void activation(mtk::MatrixXf& output,const mtk::MatrixXf& input) = 0;
 	public:
-		BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate);
-		~BaseLayer();
+		BaseNetwork(int input_size,int output_size,int batch_size,std::string network_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate);
+		~BaseNetwork();
 		void learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input);
 		void learningReflect();
 		virtual void learningBackPropagation(mtk::MatrixXf& next_error,const mtk::MatrixXf &d2,const mtk::MatrixXf* w2) = 0;
@@ -44,6 +44,7 @@ namespace mtk{
 
 		mtk::MatrixXf* getWeightPointer();
 		mtk::MatrixXf* getBiasPointer();
-
+		int getInputSize();
+		int getOutputSize();
 	};
 }

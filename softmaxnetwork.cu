@@ -1,4 +1,4 @@
-#include "softmaxlayer.h"
+#include "softmaxnetwork.h"
 #include "matrix_function.h"
 #include "cuda_common.h"
 
@@ -25,22 +25,22 @@ public:
 	}
 };
 
-SoftmaxLayer::SoftmaxLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
-	BaseLayer(input_size,output_size,batch_size,layer_name,cublas,learning_rate,adagrad_epsilon,attenuation_rate)
+SoftmaxNetwork::SoftmaxNetwork(int input_size,int output_size,int batch_size,std::string network_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
+	BaseNetwork(input_size,output_size,batch_size,network_name,cublas,learning_rate,adagrad_epsilon,attenuation_rate)
 {
 	input_row_0.setSize(1,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	inverse.setSize(output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	output0.setSize(output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 }
 
-SoftmaxLayer::~SoftmaxLayer(){}
+SoftmaxNetwork::~SoftmaxNetwork(){}
 
-void SoftmaxLayer::learningBackPropagation(mtk::MatrixXf& next_error,const mtk::MatrixXf& d2,const mtk::MatrixXf *w2){
+void SoftmaxNetwork::learningBackPropagation(mtk::MatrixXf& next_error,const mtk::MatrixXf& d2,const mtk::MatrixXf *w2){
 	mtk::MatrixFunction::copy(cublas,next_error,d2);
 	mtk::MatrixFunction::copy(cublas,d1,d2);
 }
 
-void SoftmaxLayer::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input){
+void SoftmaxNetwork::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input){
 	//input行列の0行目を取り出す
 	const float one = 1.0f,minus_one = -1.0f,zero = 0.0f;
 	mtk::MatrixFunction::copy(cublas,output,input);

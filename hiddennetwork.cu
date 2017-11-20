@@ -1,4 +1,4 @@
-#include "hiddenlayer.h"
+#include "hiddennetwork.h"
 #include "cuda_common.h"
 #include "activation.h"
 #include "matrix_function.h"
@@ -7,14 +7,14 @@
 using namespace mtk;
 
 
-HiddenLayer::HiddenLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float annuation_rate):
-	BaseLayer(input_size,output_size,batch_size,layer_name,cublas,learning_rate,adagrad_epsilon,annuation_rate)
+HiddenNetwork::HiddenNetwork(int input_size,int output_size,int batch_size,std::string network_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float annuation_rate):
+	BaseNetwork(input_size,output_size,batch_size,network_name,cublas,learning_rate,adagrad_epsilon,annuation_rate)
 {
 }
 
-HiddenLayer::~HiddenLayer(){}
+HiddenNetwork::~HiddenNetwork(){}
 
-void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2, const mtk::MatrixXf *w2){
+void HiddenNetwork::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2, const mtk::MatrixXf *w2){
 	const float one = 1.0f,zero = 0.0f;
 	mtk::MatrixFunction::map<dActReLU>(u1,u1);
 	CUDA_HANDLE_ERROR(cudaDeviceSynchronize());
@@ -42,6 +42,6 @@ void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::
 			&zero,
 			rdb1.getDevicePointer(),rdb1.getRows()));
 }
-void HiddenLayer::activation(mtk::MatrixXf &output, const mtk::MatrixXf &input) {
+void HiddenNetwork::activation(mtk::MatrixXf &output, const mtk::MatrixXf &input) {
 	mtk::MatrixFunction::map<ActReLU>(output,input);
 }

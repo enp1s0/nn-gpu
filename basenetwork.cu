@@ -1,11 +1,11 @@
 /*
- * BaseLayer
+ * BaseNetwork
  * 計算層の親クラス
  * 
  * 2017.11.20
  * mutsuki
  */
-#include "baselayer.h"
+#include "basenetwork.h"
 #include "matrix_function.h"
 #include "hyperparameter.h"
 #include "cuda_common.h"
@@ -37,8 +37,8 @@ public:
 	}
 };
 
-BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
-	input_size(input_size),output_size(output_size),batch_size(batch_size),layer_name(layer_name),cublas(cublas),learning_rate(learning_rate),adagrad_epsilon(adagrad_epsilon),attenuation_rate(attenuation_rate)
+BaseNetwork::BaseNetwork(int input_size,int output_size,int batch_size,std::string network_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
+	input_size(input_size),output_size(output_size),batch_size(batch_size),network_name(network_name),cublas(cublas),learning_rate(learning_rate),adagrad_epsilon(adagrad_epsilon),attenuation_rate(attenuation_rate)
 {
 	w1.setSize(output_size,input_size)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
 	dw1.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
@@ -58,15 +58,15 @@ BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string l
 	max_w_i.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
 	b1_tmp.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
 	w1_tmp.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
-	std::cout<<layer_name<<"("<<input_size<<","<<output_size<<","<<batch_size<<")"<<std::endl;
+	std::cout<<network_name<<"("<<input_size<<","<<output_size<<","<<batch_size<<")"<<std::endl;
 	std::cout<<" - learning rate = "<<learning_rate<<std::endl;
 	std::cout<<" - adagrad epsilon = "<<adagrad_epsilon<<std::endl;
 	std::cout<<" - momentum rate = "<<attenuation_rate<<std::endl;
 }
 
-BaseLayer::~BaseLayer(){}
+BaseNetwork::~BaseNetwork(){}
 
-void BaseLayer::learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf& input){
+void BaseNetwork::learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf& input){
 	const float one = 1.0f,zero = 0.0f;
 	mtk::MatrixFunction::copy(cublas, z0, input);
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
@@ -86,7 +86,7 @@ void BaseLayer::learningForwardPropagation(mtk::MatrixXf &output,const mtk::Matr
 	this->activation(output,u1);
 }
 
-void BaseLayer::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
+void BaseNetwork::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
 	const float one = 1.0f;
 	mtk::MatrixFunction::copy(cublas,u,b1);
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
@@ -99,7 +99,7 @@ void BaseLayer::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf
 	this->activation(output,u);
 }
 
-void BaseLayer::learningReflect(){
+void BaseNetwork::learningReflect(){
 	const float one = 1.0f;
 	const float minus_learning_rate = -learning_rate;
 	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_w1,rdw1,rdw1,1.0f,1.0f);
@@ -150,5 +150,7 @@ void BaseLayer::learningReflect(){
 	mtk::MatrixFunction::copy(cublas,b1,b1_tmp);
 }
 
-mtk::MatrixXf* BaseLayer::getWeightPointer(){return &w1;}
-mtk::MatrixXf* BaseLayer::getBiasPointer(){return &b1;}
+mtk::MatrixXf* BaseNetwork::getWeightPointer(){return &w1;}
+mtk::MatrixXf* BaseNetwork::getBiasPointer(){return &b1;}
+int BaseNetwork::getInputSize(){return input_size;}
+int BaseNetwork::getOutputSize(){return output_size;}

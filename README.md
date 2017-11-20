@@ -12,11 +12,11 @@
 10000 calc
 ## P100
 ```
-layer0(784,225,32)
+network0(784,225,32)
  - learning rate = 0.1
  - adagrad epsilon = 1
  - momentum rate = 0.2
-layer1(225,10,32)
+network1(225,10,32)
  - learning rate = 0.1
  - adagrad epsilon = 1
  - momentum rate = 0.2
@@ -37,11 +37,11 @@ Done : 104451 [ms]
 
 ## V100
 ```
-layer0(784,225,32)
+network0(784,225,32)
  - learning rate = 0.1
  - adagrad epsilon = 1
  - momentum rate = 0.2
-layer1(225,10,32)
+network1(225,10,32)
  - learning rate = 0.1
  - adagrad epsilon = 1
  - momentum rate = 0.2

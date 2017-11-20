@@ -1,6 +1,6 @@
 /*
  * BaseNetwork
- * 計算層の親クラス
+ * ネットワークの親クラス
  * 
  * 2017.11.20
  * mutsuki
@@ -86,18 +86,6 @@ void BaseNetwork::learningForwardPropagation(mtk::MatrixXf &output,const mtk::Ma
 	this->activation(output,u1);
 }
 
-void BaseNetwork::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
-	const float one = 1.0f;
-	mtk::MatrixFunction::copy(cublas,u,b1);
-	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
-			output_size,1,input_size,
-			&one,
-			w1.getDevicePointer(),output_size,
-			input.getDevicePointer(),1,
-			&one,
-			u.getDevicePointer(),output_size));
-	this->activation(output,u);
-}
 
 void BaseNetwork::learningReflect(){
 	const float one = 1.0f;
@@ -159,3 +147,36 @@ mtk::MatrixXf* BaseNetwork::getWeightPointer(){return &w1;}
 mtk::MatrixXf* BaseNetwork::getBiasPointer(){return &b1;}
 int BaseNetwork::getInputSize(){return input_size;}
 int BaseNetwork::getOutputSize(){return output_size;}
+
+
+// test methods
+
+void BaseNetwork::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
+	const float one = 1.0f,zero = 0.0f;
+	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+			output_size,test_batch_size,1,
+			&one,
+			b1.getDevicePointer(),b1.getRows(),
+			all1_t.getDevicePointer(),1,
+			&zero,
+			test_u.getDevicePointer(),test_u.getRows()));
+	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
+			output_size,test_batch_size,input_size,
+			&one,
+			w1.getDevicePointer(),w1.getRows(),
+			input.getDevicePointer(),input.getRows(),
+			&one,
+			test_u.getDevicePointer(),test_u.getRows()));
+	this->activation(output,test_u);
+}
+
+void BaseNetwork::testInit(int b){
+	test_batch_size = b;
+	test_u.setSize(input_size,test_batch_size)->allocateDevice()->initDeviceConstant(0.0f);
+	all1_t.setSize(1,test_batch_size)->allocateDevice()->initDeviceConstant(1.0f);
+}
+
+void BaseNetwork::testRelease(){
+	test_u.releaseDevice();
+	all1_t.releaseDevice();
+}

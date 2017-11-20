@@ -46,10 +46,8 @@ MatrixXf::MatrixXf():MatrixXf(0,0)
 {}
 
 MatrixXf::~MatrixXf(){
-	CUDA_HANDLE_ERROR( cudaFree( device_ptr ) );
-	CUDA_HANDLE_ERROR( cudaFreeHost( host_ptr ) );
-	device_ptr = nullptr;
-	host_ptr = nullptr;
+	this->releaseDevice();
+	this->releaseHost();
 }
 
 MatrixXf* MatrixXf::setSize(int rows,int cols){
@@ -111,7 +109,6 @@ MatrixXf* MatrixXf::initDeviceConstant(float f){
 MatrixXf* MatrixXf::initDeviceRandom(float min,float max){
 	std::random_device random;
 	deviceSetRandom<<<BLOCKS,std::min(512,threads_ceildiv(rows*cols,BLOCKS))>>>(device_ptr,min,max,random(),(threads_ceildiv(rows*cols,BLOCKS)+511)/512,rows*cols);
-	//CUDA_HANDLE_ERROR(cudaPeekAtLastError());
 	CUDA_HANDLE_ERROR(cudaDeviceSynchronize());
 	return this;
 }
@@ -130,4 +127,13 @@ MatrixXf* MatrixXf::print(std::string label){
 		std::cout<<std::endl;
 	}
 	return this;
+}
+
+void MatrixXf::releaseDevice(){
+	CUDA_HANDLE_ERROR( cudaFree( device_ptr ) );
+	device_ptr = nullptr;
+}
+void MatrixXf::releaseHost(){
+	CUDA_HANDLE_ERROR( cudaFreeHost( host_ptr ) );
+	host_ptr = nullptr;
 }

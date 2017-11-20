@@ -24,5 +24,7 @@ namespace mtk{
 		MatrixXf* initDeviceRandom(float min,float max);
 		MatrixXf* initDeviceConstant(float f);
 		MatrixXf* print(std::string label="") ;
+		void releaseDevice();
+		void releaseHost();
 	};
 }

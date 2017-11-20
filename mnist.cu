@@ -68,7 +68,6 @@ int MNISTLoader::loadMNISTData(std::string image_filename,std::string label_file
 
 	int magic_number,amount,row,col;
 	int label;
-	//char read_1byte;
 	int read_1byte_int;
 	image_ifs.read((char*)&magic_number,sizeof(magic_number));
 	magic_number = reverse( magic_number );
@@ -82,7 +81,6 @@ int MNISTLoader::loadMNISTData(std::string image_filename,std::string label_file
 	magic_number = reverse( magic_number );
 	label_ifs.read((char*)&amount,sizeof(amount));
 	amount = reverse( amount );
-	//std::cout<<"magic_number = "<<(int)magic_number<<std::endl<<"row = "<<(int)row<<std::endl<<"col = " <<(int)col<<std::endl<<"amount = "<<(int)amount<<std::endl;
 	for(int a = 0;a < train_data_amount;a++){
 		MNISTData *data = new MNISTData;
 		label_ifs.read((char*)&label,sizeof(char));
@@ -91,7 +89,6 @@ int MNISTLoader::loadMNISTData(std::string image_filename,std::string label_file
 		for(int i = 0;i < 28*28;i++){
 			image_ifs.read((char*)&read_1byte_int,sizeof(char));
 			read_1byte_int &= 0xf;
-			//data->data[i] = read_1byte_int/255.0f/28.0f/28.0f;
 			data->data[i] = read_1byte_int/255.0f;
 		}
 		if( label > 9 ){
@@ -116,7 +113,6 @@ int MNISTLoader::loadMNISTTrainData(std::string image_filename,std::string label
 			image_data.getHostPointer()[j + i * 28 * 28] = data->data[j];
 		}
 		label_data.getHostPointer()[data->label + i * 10] = 1.0f;
-		//teacher(data->label,i) = 1.0f;
 	}
 	image_data.copyToDevice();
 	label_data.copyToDevice();
@@ -132,7 +128,6 @@ int MNISTLoader::loadMNISTTestData(std::string image_filename,std::string label_
 			test_image_data.getHostPointer()[j + i * 28 * 28] = data->data[j];
 		}
 		test_label_data.getHostPointer()[data->label + i * 10] = 1.0f;
-		//teacher(data->label,i) = 1.0f;
 	}
 	test_image_data.copyToDevice();
 	test_label_data.copyToDevice();

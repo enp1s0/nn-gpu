@@ -31,8 +31,10 @@ NeuralNetwork* NeuralNetwork::construct(){
 		mtk::MatrixXf *layer = new mtk::MatrixXf;
 		layer->setSize(networks[i]->getOutputSize(),batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 		layers.push_back(layer);
+	}
+	for(auto network : networks){
 		mtk::MatrixXf *error = new mtk::MatrixXf;
-		error->setSize(networks[i+1]->getOutputSize(),batch_size)->allocateDevice()->initDeviceConstant(0.0f);
+		error->setSize(network->getOutputSize(),batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 		errors.push_back(error);
 	}
 	return this;
@@ -62,9 +64,6 @@ NeuralNetwork* NeuralNetwork::learningBackPropagation(const mtk::MatrixXf &error
 }
 
 void NeuralNetwork::release(){
-	for(auto network : networks){
-		delete network;
-	}
 	for(auto layer : layers){
 		delete layer;
 	}

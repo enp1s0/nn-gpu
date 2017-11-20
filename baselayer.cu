@@ -1,3 +1,10 @@
+/*
+ * BaseLayer
+ * 計算層の親クラス
+ * 
+ * 2017.11.20
+ * mutsuki
+ */
 #include "baselayer.h"
 #include "matrix_function.h"
 #include "hyperparameter.h"
@@ -33,11 +40,9 @@ public:
 BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string layer_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
 	input_size(input_size),output_size(output_size),batch_size(batch_size),layer_name(layer_name),cublas(cublas),learning_rate(learning_rate),adagrad_epsilon(adagrad_epsilon),attenuation_rate(attenuation_rate)
 {
-	//w1.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
 	w1.setSize(output_size,input_size)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
 	dw1.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
 	rdw1.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
-	//b1.setSize(output_size,1)->allocateDevice()->initDeviceConstant(1.0f);
 	b1.setSize(output_size,1)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
 	db1.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
 	rdb1.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
@@ -49,8 +54,6 @@ BaseLayer::BaseLayer(int input_size,int output_size,int batch_size,std::string l
 	all1_o.setSize(1,output_size)->allocateDevice()->initDeviceConstant(1.0f);
 	all1_i.setSize(1,input_size)->allocateDevice()->initDeviceConstant(1.0f);
 	u.setSize(output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
-	//max_b_i.setSize(output_size,1)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
-	//max_w_i.setSize(output_size,input_size)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
 	max_b_i.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
 	max_w_i.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
 	b1_tmp.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
@@ -102,11 +105,9 @@ void BaseLayer::learningReflect(){
 	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_w1,rdw1,rdw1,1.0f,1.0f);
 	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_b1,rdb1,rdb1,1.0f,1.0f);
 	// dw1を作る
-	//deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_w1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_w1.getSize());
 	mtk::MatrixFunction::map<AdagradMake>(w1_tmp,adagrad_w1,adagrad_epsilon);
 	mtk::MatrixFunction::elementwiseProduct(cublas,dw1,rdw1,w1_tmp,minus_learning_rate,attenuation_rate);
 	// db1を作る
-	//deviceMap<AdagradMake><<<BLOCKS,threads_ceildiv(adagrad_b1.getSize(),BLOCKS)>>>(adagrad_w1.getDevicePointer(),adagrad_w1.getDevicePointer(),adagrad_epsilon,adagrad_b1.getSize());
 	mtk::MatrixFunction::map<AdagradMake>(b1_tmp,adagrad_b1,adagrad_epsilon);
 	mtk::MatrixFunction::elementwiseProduct(cublas,db1,rdb1,b1_tmp,minus_learning_rate,attenuation_rate);
 
@@ -133,10 +134,7 @@ void BaseLayer::learningReflect(){
 				all1_o.getDevicePointer(),1,
 				&zero,
 				max_b_i.getDevicePointer(),1));
-	//max_b_i.allocateHost()->copyToHost()->print("test : " + std::to_string(max_w_index));
-	//deviceMap<MaxAndInverse><<<BLOCKS,threads_ceildiv(max_b_i.getSize(),BLOCKS)>>>(max_b_i.getDevicePointer(),max_b_i.getDevicePointer(),1.0f,max_b_i.getSize());
 	mtk::MatrixFunction::map<MaxAndInverse>(max_b_i,max_b_i,1.0f);
-	//max_b_i.copyToHost()->print("test : " + std::to_string(max_w_index));
 	CUBLAS_HANDLE_ERROR( cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 				output_size,input_size,1,
 				&one,

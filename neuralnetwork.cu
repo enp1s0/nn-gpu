@@ -1,20 +1,28 @@
 #include "neuralnetwork.h"
 #include "cublas_common.h"
+#include "matrix_function.h"
 
 using namespace mtk;
 
-NeuralNetwork::NeuralNetwork(int batch_size)
-	: batch_size(batch_size)
+NeuralNetwork::NeuralNetwork(int batch_size,cublasHandle_t cublas)
+	: batch_size(batch_size),cublas(cublas)
 {}
 
-//NeuralNetwork* NeuralNetwork::add(int input_size,int output_size,std::string network_name,float learning_rate,float adagrad_epsilon,float attenuation_rate){
 NeuralNetwork* NeuralNetwork::add(mtk::BaseNetwork *network){
-	//Network *network = new Network(input_size,output_size,batch_size,network_name,learning_rate,adagrad_epsilon,attenuation_rate);
-	//networks.push_back(network);
+	networks.push_back(network);
 	return this;
 }
 
 NeuralNetwork* NeuralNetwork::calcError(mtk::MatrixXf &error,const mtk::MatrixXf &output,const mtk::MatrixXf& teacher){
+	float minus_one = -1.0f;
+	mtk::MatrixFunction::copy(cublas,error,output);
+	CUBLAS_HANDLE_ERROR(cublasSaxpy(cublas,output.getSize(), &minus_one,
+				teacher.getDevicePointer(),1,
+				error.getDevicePointer(),1));
+	return this;
+}
+
+NeuralNetwork* NeuralNetwork::construct(){
 	return this;
 }
 

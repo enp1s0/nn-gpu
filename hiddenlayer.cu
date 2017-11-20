@@ -12,13 +12,10 @@ HiddenLayer::HiddenLayer(int input_size,int output_size,int batch_size,std::stri
 {
 }
 
-HiddenLayer::~HiddenLayer(){
-}
-//HiddenLayer::~HiddenLayer(){}
+HiddenLayer::~HiddenLayer(){}
 
 void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2, const mtk::MatrixXf *w2){
 	const float one = 1.0f,zero = 0.0f;
-	//deviceMap<dActReLU><<<BLOCKS,threads_ceildiv(u1.getSize(),BLOCKS)>>>(u1.getDevicePointer(),u1.getDevicePointer(),u1.getSize());
 	mtk::MatrixFunction::map<dActReLU>(u1,u1);
 	CUDA_HANDLE_ERROR(cudaDeviceSynchronize());
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_T,CUBLAS_OP_N,
@@ -45,20 +42,6 @@ void HiddenLayer::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::
 			&zero,
 			rdb1.getDevicePointer(),rdb1.getRows()));
 }
-
-class Poi{
-public:
-	__device__ float operator()(float a){
-		return 1.0f;
-	}
-};
-
-class Exp{
-public:
-	__device__ float operator()(float a) const{
-		return expf(a);
-	}
-};
 void HiddenLayer::activation(mtk::MatrixXf &output, const mtk::MatrixXf &input) {
 	mtk::MatrixFunction::map<ActReLU>(output,input);
 }

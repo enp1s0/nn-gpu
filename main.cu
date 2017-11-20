@@ -10,7 +10,7 @@
 #include "aggregation.h"
 
 const int input_size = 28 * 28;
-const int network0_output_size = 10 * 15;
+const int network0_output_size = 30 * 15;
 const int network1_output_size = 10;
 const int batch_size = 128;
 const int calc = 10000;
@@ -68,12 +68,12 @@ int main(){
 		network.learningForwardPropagation(output,input)->calcError(error,output,teacher)->learningBackPropagation(error);
 		if((c+1)%test_interval == 0){
 			aggregation.clear();
-			//for(int i = 0;i < 10000;i+=test_batch_size){
+			for(int i = 0;i < 10000;i+=test_batch_size){
 				//mnist.setTestDataToMatrix(test_input, test_teacher,i,test_batch_size);
 				mnist.setTestDataToMatrix(test_input, test_teacher,0,test_batch_size);
 				network.learningForwardPropagation(test_output,test_input);
 				aggregation.compareWithTeacher(test_output,test_teacher);
-			//}
+			}
 			std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;
 			std::cout<<" - accuracy = "<<aggregation.calcAccuracy()*100<<" %"<<std::endl;
 		}

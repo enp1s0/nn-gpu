@@ -121,7 +121,7 @@ void BaseLayer::learningReflect(){
 				b1.getDevicePointer(),1) );
 	
 	// 重みが大きくなりすぎないように
-	/*int max_w_index = 0;
+	int max_w_index = 0;
 	float zero = 0.0f;
 	// 絶対値が最大の要素のindexを返す
 	CUBLAS_HANDLE_ERROR( cublasIsamax( cublas,w1.getSize(),
@@ -149,7 +149,7 @@ void BaseLayer::learningReflect(){
 	mtk::MatrixFunction::elementwiseProduct(cublas,b1_tmp,max_b_i,b1);
 	// 結果をコピー
 	mtk::MatrixFunction::copy(cublas,w1,w1_tmp);
-	mtk::MatrixFunction::copy(cublas,b1,b1_tmp);*/
+	mtk::MatrixFunction::copy(cublas,b1,b1_tmp);
 }
 
 mtk::MatrixXf* BaseLayer::getWeightPointer(){return &w1;}

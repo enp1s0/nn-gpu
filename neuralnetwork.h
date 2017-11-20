@@ -12,6 +12,7 @@ namespace mtk{
 		std::vector<mtk::BaseNetwork*> networks;
 	public:
 		NeuralNetwork(int batch_size,cublasHandle_t cubals);
+		~NeuralNetwork();
 		NeuralNetwork* add(mtk::BaseNetwork* network);
 		NeuralNetwork* construct();
 		NeuralNetwork* calcError(mtk::MatrixXf& error,const mtk::MatrixXf& output,const mtk::MatrixXf& teacher);

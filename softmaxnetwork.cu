@@ -51,7 +51,7 @@ void SoftmaxNetwork::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input
 				input.getDevicePointer(), output_size,
 				input_row_0.getDevicePointer(),1));
 	CUBLAS_HANDLE_ERROR( cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
-				output_size,batch_size,1,
+				output_size,output.getCols(),1,
 				&minus_one,
 				all1_o.getDevicePointer(),output_size,
 				input_row_0.getDevicePointer(),1,

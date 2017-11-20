@@ -34,3 +34,28 @@ Start training
 10000 / 10000 (100%)
 Done : 104451 [ms]
 ```
+
+## V100
+```
+layer0(784,225,32)
+ - learning rate = 0.1
+ - adagrad epsilon = 1
+ - momentum rate = 0.2
+layer1(225,10,32)
+ - learning rate = 0.1
+ - adagrad epsilon = 1
+ - momentum rate = 0.2
+Loading training data ... DONE : 1569.03 [ms]
+Start training
+1000 / 10000 (10%)
+2000 / 10000 (20%)
+3000 / 10000 (30%)
+4000 / 10000 (40%)
+5000 / 10000 (50%)
+6000 / 10000 (60%)
+7000 / 10000 (70%)
+8000 / 10000 (80%)
+9000 / 10000 (90%)
+10000 / 10000 (100%)
+Done : 87290.8 [ms]
+```

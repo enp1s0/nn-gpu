@@ -7,13 +7,14 @@
 #include "mnist.h"
 #include "cuda_event.h"
 #include "neuralnetwork.h"
+#include "aggregation.h"
 
 const int input_size = 28 * 28;
-const int network0_output_size = 15 * 15;
+const int network0_output_size = 10 * 15;
 const int network1_output_size = 10;
 const int batch_size = 64;
 const int calc = 10000;
-const int test_interval = 100;
+const int test_interval = 1000;
 
 int main(){
 	mtk::CudaEvent event;
@@ -35,6 +36,8 @@ int main(){
 	teacher.setSize(network1_output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	error.setSize(network1_output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 
+	mtk::Aggregation aggregation(batch_size,10,cublas);
+
 	// 学習データ
 	std::cout<<"Loading training data ... ";std::cout.flush();
 	mtk::MNISTLoader mnist;
@@ -50,11 +53,14 @@ int main(){
 	for(int c = 0;c < calc;c++){
 		mnist.setTrainDataToMatrix(input,teacher,batch_size);
 		network.learningForwardPropagation(output,input)->calcError(error,output,teacher)->learningBackPropagation(error);
-		if((c+1)%test_interval == 0){std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;}
+		if((c+1)%test_interval == 0){
+			std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;
+		}
 	}
-	//hidden0.allocateHost()->copyToHost()->print("hidden");
-	//output.copyToHost()->print("output");
 	error.allocateHost()->copyToHost()->print("output error");
+			aggregation.clear();
+			aggregation.compareWithTeacher(output,teacher);
+			std::cout<<"accuracy = "<<aggregation.calcAccuracy()<<std::endl;
 	event.recordEvent("calc_done");
 	std::cout<<"Done : "<<event.elapsedTime("calc_start","calc_done")<<" [ms]"<<std::endl; 
 	CUBLAS_HANDLE_ERROR(cublasDestroy( cublas));

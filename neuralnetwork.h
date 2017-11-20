@@ -10,6 +10,7 @@ namespace mtk{
 		std::vector<mtk::MatrixXf*> layers;
 		std::vector<mtk::MatrixXf*> errors;
 		std::vector<mtk::BaseNetwork*> networks;
+		std::vector<mtk::MatrixXf*> test_layers;
 	public:
 		NeuralNetwork(int batch_size,cublasHandle_t cubals);
 		~NeuralNetwork();
@@ -19,5 +20,10 @@ namespace mtk{
 		NeuralNetwork* learningForwardPropagation(mtk::MatrixXf& output,const mtk::MatrixXf& input);
 		NeuralNetwork* learningBackPropagation(const mtk::MatrixXf& error);
 		void release();
+
+		// test
+		NeuralNetwork* testInit(int test_batch_size);
+		NeuralNetwork* testForwardPropagation(mtk::MatrixXf& output,const mtk::MatrixXf &input);
+		void testRelease();
 	};
 }

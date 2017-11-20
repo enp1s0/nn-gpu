@@ -71,3 +71,37 @@ void NeuralNetwork::release(){
 		delete error;
 	}
 }
+
+NeuralNetwork* NeuralNetwork::testInit(int test_batch_size){
+	for(auto network : networks){
+		network->testInit(test_batch_size);
+	}
+	for(int i = 0;i < networks.size()-1;i++){
+		mtk::MatrixXf *layer = new mtk::MatrixXf;
+		layer->setSize(networks[i]->getOutputSize(),test_batch_size)->allocateDevice()->initDeviceConstant(0.0f);
+		test_layers.push_back(layer);
+	}
+	return this;
+}
+
+
+NeuralNetwork* NeuralNetwork::testForwardPropagation(mtk::MatrixXf& output,const mtk::MatrixXf& input){
+	if(networks.size()==1){
+		networks[0]->testForwardPropagation(output,input);
+	}else{
+		networks[0]->testForwardPropagation(*(layers[0]),input);
+		for(int i = 1;i < networks.size()-2;i++){
+			networks[i]->testForwardPropagation((*test_layers[i]),(*test_layers[i-1]));
+		}
+		networks[networks.size()-1]->learningForwardPropagation(output,(*test_layers[networks.size()-2]));
+	}
+	return this;
+}
+void NeuralNetwork::testRelease(){
+	for(auto network : networks){
+		network->testRelease();
+	}
+	for(auto layer : test_layers){
+		delete layer;
+	}
+}

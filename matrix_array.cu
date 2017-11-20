@@ -129,11 +129,13 @@ MatrixXf* MatrixXf::print(std::string label){
 	return this;
 }
 
-void MatrixXf::releaseDevice(){
+MatrixXf* MatrixXf::releaseDevice(){
 	CUDA_HANDLE_ERROR( cudaFree( device_ptr ) );
 	device_ptr = nullptr;
+	return this;
 }
-void MatrixXf::releaseHost(){
+MatrixXf* MatrixXf::releaseHost(){
 	CUDA_HANDLE_ERROR( cudaFreeHost( host_ptr ) );
 	host_ptr = nullptr;
+	return this;
 }

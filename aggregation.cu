@@ -52,6 +52,7 @@ void mtk::Aggregation::compareWithTeacher(const mtk::MatrixXf& output,const mtk:
 				&result_v ) );
 	correct += (int)result_v;
 	all_test_size += output.getCols();
+	result.allocateHost()->copyToHost()->print("true|false");
 }
 
 float mtk::Aggregation::calcAccuracy() const{

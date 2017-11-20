@@ -45,3 +45,7 @@ void HiddenNetwork::learningBackPropagation(mtk::MatrixXf &next_error, const mtk
 void HiddenNetwork::activation(mtk::MatrixXf &output, const mtk::MatrixXf &input) {
 	mtk::MatrixFunction::map<ActReLU>(output,input);
 }
+
+void HiddenNetwork::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2){
+	BaseNetwork::learningBackPropagation(next_error,d2);
+}

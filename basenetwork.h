@@ -39,6 +39,7 @@ namespace mtk{
 		void learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input);
 		void learningReflect();
 		virtual void learningBackPropagation(mtk::MatrixXf& next_error,const mtk::MatrixXf &d2,const mtk::MatrixXf* w2) = 0;
+		void learningBackPropagation(mtk::MatrixXf& next_error,const mtk::MatrixXf &d2); //最終層にある時
 
 		void testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) ;
 

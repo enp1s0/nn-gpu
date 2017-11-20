@@ -150,6 +150,11 @@ void BaseNetwork::learningReflect(){
 	mtk::MatrixFunction::copy(cublas,b1,b1_tmp);
 }
 
+void BaseNetwork::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2){
+	mtk::MatrixFunction::copy(cublas,next_error,d2);
+	mtk::MatrixFunction::copy(cublas,d1,d2);
+}
+
 mtk::MatrixXf* BaseNetwork::getWeightPointer(){return &w1;}
 mtk::MatrixXf* BaseNetwork::getBiasPointer(){return &b1;}
 int BaseNetwork::getInputSize(){return input_size;}

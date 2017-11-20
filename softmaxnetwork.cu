@@ -36,8 +36,10 @@ SoftmaxNetwork::SoftmaxNetwork(int input_size,int output_size,int batch_size,std
 SoftmaxNetwork::~SoftmaxNetwork(){}
 
 void SoftmaxNetwork::learningBackPropagation(mtk::MatrixXf& next_error,const mtk::MatrixXf& d2,const mtk::MatrixXf *w2){
-	mtk::MatrixFunction::copy(cublas,next_error,d2);
-	mtk::MatrixFunction::copy(cublas,d1,d2);
+	BaseNetwork::learningBackPropagation(next_error,d2);
+}
+void SoftmaxNetwork::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2){
+	BaseNetwork::learningBackPropagation(next_error,d2);
 }
 
 void SoftmaxNetwork::activation(mtk::MatrixXf& output,const mtk::MatrixXf& input){

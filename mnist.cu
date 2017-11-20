@@ -20,6 +20,17 @@ __global__ void deviceRandomArrangement(float* input,float* teacher,float *image
 	}
 }
 
+__global__ void devieSequentialArrangement(float* input,float* teacher,float* image_data,float* label_data,int start,int batch_size){
+	int tid = blockIdx.x * blockDim.x + threadIdx.x;
+	if (tid >= batch_size)return;
+	for(int i = 0;i < 28*28;i++){
+		input[i+tid*28*28] = image_data[i+(start+tid)*28*28];
+	}
+	for(int i = 0;i < 10;i++){
+		teacher[i + tid*10] = label_data[i + (start+tid)*10];
+	}
+}
+
 MNISTLoader::MNISTLoader(){
 	std::random_device rnd;
 	mt.seed(rnd());
@@ -47,16 +58,11 @@ void MNISTLoader::printTestImage(int n){
 }
 
 void MNISTLoader::setTrainDataToMatrix(mtk::MatrixXf& input,mtk::MatrixXf& teacher,int batch_size){
-	//teacher.initDeviceConstant(0.0f);
 	deviceRandomArrangement<<<64,threads_ceildiv(batch_size,64)>>>(input.getDevicePointer(),teacher.getDevicePointer(),image_data.getDevicePointer(),label_data.getDevicePointer(),batch_size,mt());
 }
 
-int MNISTLoader::setTestDataToMatrix(mtk::MatrixXf& input,int index){
-	MNISTData* data = test_data_vector[index];
-	for(int j = 0;j < 28*28;j++){
-		//input(j) = data->data[j];
-	}
-	return data->label;
+void MNISTLoader::setTestDataToMatrix(mtk::MatrixXf& input,mtk::MatrixXf& teacher,int start,int batch_size){
+	devieSequentialArrangement<<<64,threads_ceildiv(batch_size,64)>>>(input.getDevicePointer(),teacher.getDevicePointer(),test_image_data.getDevicePointer(),test_label_data.getDevicePointer(),start,batch_size);
 }
 
 int MNISTLoader::loadMNISTData(std::string image_filename,std::string label_filename,std::vector<MNISTData*>& data_vector){

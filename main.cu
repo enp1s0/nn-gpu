@@ -13,11 +13,11 @@ const int input_size = 28 * 28;
 const int network0_output_size = 15 * 25;
 const int network1_output_size = 10 * 15;
 const int last_output_size = 10;
-const int batch_size = 256;
-const int calc = 1000;
+const int batch_size = 64;
+const int calc = 10000;
 const int test_interval = 100;
 
-const int test_batch_size = batch_size;
+const int test_batch_size = 256;
 
 
 int main(){
@@ -82,9 +82,9 @@ int main(){
 	//aggregation.clear();
 	//aggregation.compareWithTeacher(output,teacher);
 	//std::cout<<" - accuracy = "<<aggregation.calcAccuracy()*100<<" %"<<std::endl;
-	/*output.allocateHost()->copyToHost()->print("output");
+	output.allocateHost()->copyToHost()->print("output");
 	error.allocateHost()->copyToHost()->print("output error");
-	teacher.allocateHost()->copyToHost()->print("teacher");*/
+	teacher.allocateHost()->copyToHost()->print("teacher");
 	event.recordEvent("calc_done");
 	std::cout<<"Done : "<<event.elapsedTime("calc_start","calc_done")<<" [ms]"<<std::endl; 
 	CUBLAS_HANDLE_ERROR(cublasDestroy( cublas));

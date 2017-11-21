@@ -147,6 +147,7 @@ mtk::MatrixXf* BaseNetwork::getWeightPointer(){return &w1;}
 mtk::MatrixXf* BaseNetwork::getBiasPointer(){return &b1;}
 int BaseNetwork::getInputSize(){return input_size;}
 int BaseNetwork::getOutputSize(){return output_size;}
+std::string BaseNetwork::getNetworkName(){return network_name;}
 
 
 // test methods
@@ -173,7 +174,7 @@ void BaseNetwork::testForwardPropagation(mtk::MatrixXf &output,const mtk::Matrix
 
 void BaseNetwork::testInit(int b){
 	test_batch_size = b;
-	test_u.setSize(input_size,test_batch_size)->allocateDevice()->initDeviceConstant(0.0f);
+	test_u.setSize(output_size,test_batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	all1_t.setSize(1,test_batch_size)->allocateDevice()->initDeviceConstant(1.0f);
 }
 
@@ -181,3 +182,4 @@ void BaseNetwork::testRelease(){
 	test_u.releaseDevice();
 	all1_t.releaseDevice();
 }
+

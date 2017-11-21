@@ -53,6 +53,6 @@ namespace mtk{
 		mtk::MatrixXf* getBiasPointer();
 		int getInputSize();
 		int getOutputSize();
-
+		std::string getNetworkName();
 	};
 }

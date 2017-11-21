@@ -13,11 +13,11 @@ const int input_size = 28 * 28;
 const int network0_output_size = 15 * 25;
 const int network1_output_size = 10 * 15;
 const int last_output_size = 10;
-const int batch_size = 128;
+const int batch_size = 256;
 const int calc = 10000;
 const int test_interval = 100;
 
-const int test_batch_size = 256;
+const int test_batch_size = batch_size;
 
 
 int main(){

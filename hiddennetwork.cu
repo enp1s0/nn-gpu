@@ -42,7 +42,10 @@ void HiddenNetwork::learningBackPropagation(mtk::MatrixXf &next_error, const mtk
 			&zero,
 			rdb1.getDevicePointer(),rdb1.getRows()));
 }
-void HiddenNetwork::activation(mtk::MatrixXf &output, const mtk::MatrixXf &input) {
+void HiddenNetwork::learningActivation(mtk::MatrixXf &output, const mtk::MatrixXf &input) {
+	mtk::MatrixFunction::map<ActReLU>(output,input);
+}
+void HiddenNetwork::testActivation(mtk::MatrixXf &output, const mtk::MatrixXf &input) {
 	mtk::MatrixFunction::map<ActReLU>(output,input);
 }
 

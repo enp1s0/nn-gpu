@@ -35,7 +35,8 @@ namespace mtk{
 		mtk::MatrixXf test_u;
 		mtk::MatrixXf all1_t;
 
-		virtual void activation(mtk::MatrixXf& output,const mtk::MatrixXf& input) = 0;
+		virtual void learningActivation(mtk::MatrixXf& output,const mtk::MatrixXf& input) = 0;
+		virtual void testActivation(mtk::MatrixXf& output,const mtk::MatrixXf& input) = 0;
 	public:
 		BaseNetwork(int input_size,int output_size,int batch_size,std::string network_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate);
 		~BaseNetwork();
@@ -44,9 +45,9 @@ namespace mtk{
 		virtual void learningBackPropagation(mtk::MatrixXf& next_error,const mtk::MatrixXf &d2,const mtk::MatrixXf* w2) = 0;
 		void learningBackPropagation(mtk::MatrixXf& next_error,const mtk::MatrixXf &d2); //最終層にある時
 
-		void testInit(int test_batch_size);
+		virtual void testInit(int test_batch_size);
 		void testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) ;
-		void testRelease();
+		virtual void testRelease();
 
 		mtk::MatrixXf* getWeightPointer();
 		mtk::MatrixXf* getBiasPointer();

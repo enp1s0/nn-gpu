@@ -83,7 +83,7 @@ void BaseNetwork::learningForwardPropagation(mtk::MatrixXf &output,const mtk::Ma
 			input.getDevicePointer(),input.getRows(),
 			&one,
 			u1.getDevicePointer(),output_size));
-	this->activation(output,u1);
+	this->learningActivation(output,u1);
 }
 
 
@@ -167,7 +167,8 @@ void BaseNetwork::testForwardPropagation(mtk::MatrixXf &output,const mtk::Matrix
 			input.getDevicePointer(),input.getRows(),
 			&one,
 			test_u.getDevicePointer(),test_u.getRows()));
-	this->activation(output,test_u);
+
+	this->testActivation(output,test_u);
 }
 
 void BaseNetwork::testInit(int b){

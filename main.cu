@@ -72,7 +72,7 @@ int main(){
 			aggregation.clear();
 			for(int i = 0;i < 10000;i+=test_batch_size){
 				mnist.setTestDataToMatrix(test_input, test_teacher,i,test_batch_size);
-				network.learningForwardPropagation(test_output,test_input);
+				network.testForwardPropagation(test_output,test_input);
 				aggregation.compareWithTeacher(test_output,test_teacher);
 			}
 			std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;

@@ -1,3 +1,4 @@
+#include <iostream>
 #include "cuda_common.h"
 #include "cublas_common.h"
 #include "aggregation.h"

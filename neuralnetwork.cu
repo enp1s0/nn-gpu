@@ -1,3 +1,4 @@
+#include <iostream>
 #include "neuralnetwork.h"
 #include "cublas_common.h"
 #include "matrix_function.h"
@@ -37,6 +38,13 @@ NeuralNetwork* NeuralNetwork::construct(){
 		error->setSize(network->getOutputSize(),batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 		errors.push_back(error);
 	}
+	std::cout<<"Layers"<<std::endl;
+	std::cout<<" - layers : "<<layers.size()<<std::endl;
+	for(auto layer : layers)
+		std::cout<<"	- ( "<<layer->getRows()<<" , "<<layer->getCols()<<" )"<<std::endl;
+	std::cout<<" - errors : "<<errors.size()<<std::endl;
+	for(auto error : errors)
+		std::cout<<"	- ( "<<error->getRows()<<" , "<<error->getCols()<<" )"<<std::endl;
 	return this;
 }
 
@@ -44,8 +52,8 @@ NeuralNetwork* NeuralNetwork::learningForwardPropagation(mtk::MatrixXf& output,c
 	if(networks.size()==1){
 		networks[0]->learningForwardPropagation(output,input);
 	}else{
-		networks[0]->learningForwardPropagation(*(layers[0]),input);
-		for(int i = 1;i < networks.size()-2;i++){
+		networks[0]->learningForwardPropagation(*layers[0],input);
+		for(int i = 1;i < networks.size()-1;i++){
 			networks[i]->learningForwardPropagation((*layers[i]),(*layers[i-1]));
 		}
 		networks[networks.size()-1]->learningForwardPropagation(output,(*layers[networks.size()-2]));
@@ -90,10 +98,10 @@ NeuralNetwork* NeuralNetwork::testForwardPropagation(mtk::MatrixXf& output,const
 		networks[0]->testForwardPropagation(output,input);
 	}else{
 		networks[0]->testForwardPropagation(*(layers[0]),input);
-		for(int i = 1;i < networks.size()-2;i++){
+		for(int i = 1;i < networks.size()-1;i++){
 			networks[i]->testForwardPropagation((*test_layers[i]),(*test_layers[i-1]));
 		}
-		networks[networks.size()-1]->learningForwardPropagation(output,(*test_layers[networks.size()-2]));
+		networks[networks.size()-1]->testForwardPropagation(output,(*test_layers[networks.size()-2]));
 	}
 	return this;
 }

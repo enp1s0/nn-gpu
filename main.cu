@@ -10,14 +10,14 @@
 #include "aggregation.h"
 
 const int input_size = 28 * 28;
-const int network0_output_size = 15 * 25;
-const int network1_output_size = 10 * 15;
+const int network0_output_size = 15 * 15;
+//const int network1_output_size = 15 * 15;
 const int last_output_size = 10;
 const int batch_size = 256;
-const int calc = 10000;
-const int test_interval = 100;
+const int calc = 100000;
+const int test_interval = 1000;
 
-const int test_batch_size = batch_size;
+const int test_batch_size = batch_size * 4;
 
 
 int main(){
@@ -32,8 +32,8 @@ int main(){
 
 	mtk::NeuralNetwork network(batch_size,cublas);
 	network.add(new mtk::HiddenNetwork(input_size,network0_output_size,batch_size,"first network",cublas))
-		->add(new mtk::HiddenNetwork(network0_output_size,network1_output_size,batch_size,"second network",cublas))
-		->add(new mtk::SoftmaxNetwork(network1_output_size,last_output_size,batch_size,"last network",cublas))
+		//->add(new mtk::HiddenNetwork(network0_output_size,network1_output_size,batch_size,"second network",cublas))
+		->add(new mtk::SoftmaxNetwork(network0_output_size,last_output_size,batch_size,"last network",cublas))
 		->construct();
 	mtk::MatrixXf input,teacher,error,output;
 	input.setSize(input_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);

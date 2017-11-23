@@ -10,14 +10,14 @@
 #include "aggregation.h"
 
 const int input_size = 28 * 28;
-const int network0_output_size = 25 * 15;
+const int network0_output_size = 15 * 15;
 //const int network1_output_size = 15 * 15;
 const int last_output_size = 10;
-const int batch_size = 256;
-const int calc = 100000;
+const int batch_size = 32;
+const int calc = 10000;
 const int test_interval = 1000;
 
-const int test_batch_size = batch_size * 4;
+const int test_batch_size = batch_size;
 
 
 int main(){
@@ -31,7 +31,7 @@ int main(){
 	CUBLAS_HANDLE_ERROR(cublasCreate(&cublas));
 
 	mtk::NeuralNetwork network(batch_size,cublas);
-	network.add(new mtk::HiddenNetwork(input_size,network0_output_size,batch_size,"first network",cublas))
+	network.add(new mtk::HiddenNetwork(input_size,network0_output_size,batch_size,"first network",cublas,0.9))
 		//->add(new mtk::HiddenNetwork(network0_output_size,network1_output_size,batch_size,"second network",cublas))
 		->add(new mtk::SoftmaxNetwork(network0_output_size,last_output_size,batch_size,"last network",cublas))
 		->construct();
@@ -82,9 +82,9 @@ int main(){
 	//aggregation.clear();
 	//aggregation.compareWithTeacher(output,teacher);
 	//std::cout<<" - accuracy = "<<aggregation.calcAccuracy()*100<<" %"<<std::endl;
-	output.allocateHost()->copyToHost()->print("output");
-	error.allocateHost()->copyToHost()->print("output error");
-	teacher.allocateHost()->copyToHost()->print("teacher");
+	//output.allocateHost()->copyToHost()->print("output");
+	//error.allocateHost()->copyToHost()->print("output error");
+	//teacher.allocateHost()->copyToHost()->print("teacher");
 	event.recordEvent("calc_done");
 	std::cout<<"Done : "<<event.elapsedTime("calc_start","calc_done")<<" [ms]"<<std::endl; 
 	CUBLAS_HANDLE_ERROR(cublasDestroy( cublas));

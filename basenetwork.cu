@@ -130,7 +130,6 @@ void BaseNetwork::learningReflect(){
 				all1_i.getDevicePointer(),1,
 				&zero,
 				max_w_i.getDevicePointer(),max_w_i.getRows()));
-	// 正規化
 	mtk::MatrixFunction::elementwiseProduct(cublas,w1_tmp,max_w_i,w1);
 	mtk::MatrixFunction::elementwiseProduct(cublas,b1_tmp,max_b_i,b1);
 	// 結果をコピー

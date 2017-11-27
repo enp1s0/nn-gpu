@@ -10,7 +10,7 @@
 
 ### 実行ログ
 10000 calc
-## P100
+#### P100
 ```
 network0(784,225,32)
  - learning rate = 0.1
@@ -35,7 +35,7 @@ Start training
 Done : 104451 [ms]
 ```
 
-## V100
+#### V100
 ```
 network0(784,225,32)
  - learning rate = 0.1
@@ -59,3 +59,6 @@ Start training
 10000 / 10000 (100%)
 Done : 87290.8 [ms]
 ```
+
+## MNIST学習結果
+![](./result-matrix.png)

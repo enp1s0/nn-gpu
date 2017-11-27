@@ -48,7 +48,7 @@ __global__ void deviceMatrixCompareWithTeacher(float *result,float *output_ptr ,
 				teacher_max_index = i;
 			}
 		}
-		atomicAdd(result+(output_max_index + teacher_max_index * class_size),1);
+		atomicAdd(result+(output_max_index + teacher_max_index * class_size),1.0f);
 	}
 }
 
@@ -87,5 +87,5 @@ float mtk::Aggregation::accuracyCalcAccuracy() const{
 
 
 void mtk::Aggregation::matrixCompareWithTeacher(mtk::MatrixXf &result_matrix, const mtk::MatrixXf &output, const mtk::MatrixXf &teacher){
-	deviceCompareWithTeacher<<<BLOCKS,std::min(THREADS,threads_ceildiv(output.getCols(),BLOCKS))>>>(result_matrix.getDevicePointer(),output.getDevicePointer(),teacher.getDevicePointer(),class_size,batch_size,threads_ceildiv(threads_ceildiv(output.getCols(),BLOCKS),THREADS));
+	deviceMatrixCompareWithTeacher<<<BLOCKS,std::min(THREADS,threads_ceildiv(output.getCols(),BLOCKS))>>>(result_matrix.getDevicePointer(),output.getDevicePointer(),teacher.getDevicePointer(),class_size,batch_size,threads_ceildiv(threads_ceildiv(output.getCols(),BLOCKS),THREADS));
 }

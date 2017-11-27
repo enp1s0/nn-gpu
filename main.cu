@@ -15,7 +15,7 @@ const int network0_output_size = 5 * 10;
 const int last_output_size = 10;
 const int batch_size = 32;
 const int calc = 100000;
-const int test_interval = 1000;
+const int test_interval = 10000;
 
 const int test_batch_size = batch_size;
 

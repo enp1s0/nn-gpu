@@ -9,8 +9,9 @@ namespace mtk{
 		cublasHandle_t cublas;
 	public:
 		Aggregation(int class_size,int batch_size,cublasHandle_t cublas);
-		void compareWithTeacher(const mtk::MatrixXf& output,const mtk::MatrixXf& teacher);
-		void clear();
-		float calcAccuracy() const;
+		void accuracyCompareWithTeacher(const mtk::MatrixXf& output,const mtk::MatrixXf& teacher);
+		void accuracyClear();
+		float accuracyCalcAccuracy() const;
+		void matrixCompareWithTeacher(mtk::MatrixXf& result,const mtk::MatrixXf& output,const mtk::MatrixXf& teacher);
 	};
 }

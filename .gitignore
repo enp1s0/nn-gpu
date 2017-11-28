@@ -3,3 +3,4 @@ nn-gpu
 exec
 obj/*.o
 log*
+*.bak

@@ -9,7 +9,7 @@ NeuralNetwork::NeuralNetwork(int batch_size,cublasHandle_t cublas)
 	: batch_size(batch_size),cublas(cublas)
 {}
 
-NeuralNetwork* NeuralNetwork::add(mtk::BaseUnit *network){
+NeuralNetwork* NeuralNetwork::add(mtk::BaseNetwork *network){
 	networks.push_back(network);
 	return this;
 }

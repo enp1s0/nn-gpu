@@ -3,7 +3,7 @@
 #include "basenetwork.h"
 #include "hyperparameter.h"
 namespace mtk{
-	class SoftmaxUnit : public BaseUnit{
+	class SoftmaxUnit : public BaseNetwork{
 		mtk::MatrixXf input_row_0;
 		mtk::MatrixXf inverse;
 		mtk::MatrixXf output0;

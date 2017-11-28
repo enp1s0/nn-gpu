@@ -1,5 +1,5 @@
 /*
- * BaseUnit
+ * BaseNetwork
  * ネットワークの親クラス
  * 
  * 2017.11.20
@@ -37,7 +37,7 @@ public:
 	}
 };
 
-BaseUnit::BaseUnit(int input_size,int output_size,int batch_size,std::string network_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
+BaseNetwork::BaseNetwork(int input_size,int output_size,int batch_size,std::string network_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
 	input_size(input_size),output_size(output_size),batch_size(batch_size),network_name(network_name),cublas(cublas),learning_rate(learning_rate),adagrad_epsilon(adagrad_epsilon),attenuation_rate(attenuation_rate)
 {
 	w1.setSize(output_size,input_size)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
@@ -64,9 +64,9 @@ BaseUnit::BaseUnit(int input_size,int output_size,int batch_size,std::string net
 	std::cout<<" - momentum rate = "<<attenuation_rate<<std::endl;
 }
 
-BaseUnit::~BaseUnit(){}
+BaseNetwork::~BaseNetwork(){}
 
-void BaseUnit::learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf& input){
+void BaseNetwork::learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf& input){
 	const float one = 1.0f,zero = 0.0f;
 	mtk::MatrixFunction::copy(cublas, z0, input);
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
@@ -87,7 +87,7 @@ void BaseUnit::learningForwardPropagation(mtk::MatrixXf &output,const mtk::Matri
 }
 
 
-void BaseUnit::learningReflect(){
+void BaseNetwork::learningReflect(){
 	const float one = 1.0f;
 	const float minus_learning_rate = -learning_rate;
 	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_w1,rdw1,rdw1,1.0f,1.0f);
@@ -137,21 +137,21 @@ void BaseUnit::learningReflect(){
 	mtk::MatrixFunction::copy(cublas,b1,b1_tmp);
 }
 
-void BaseUnit::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2){
+void BaseNetwork::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2){
 	mtk::MatrixFunction::copy(cublas,next_error,d2);
 	mtk::MatrixFunction::copy(cublas,d1,d2);
 }
 
-mtk::MatrixXf* BaseUnit::getWeightPointer(){return &w1;}
-mtk::MatrixXf* BaseUnit::getBiasPointer(){return &b1;}
-int BaseUnit::getInputSize(){return input_size;}
-int BaseUnit::getOutputSize(){return output_size;}
-std::string BaseUnit::getNetworkName(){return network_name;}
+mtk::MatrixXf* BaseNetwork::getWeightPointer(){return &w1;}
+mtk::MatrixXf* BaseNetwork::getBiasPointer(){return &b1;}
+int BaseNetwork::getInputSize(){return input_size;}
+int BaseNetwork::getOutputSize(){return output_size;}
+std::string BaseNetwork::getNetworkName(){return network_name;}
 
 
 // test methods
 
-void BaseUnit::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
+void BaseNetwork::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input) {
 	const float one = 1.0f,zero = 0.0f;
 	CUBLAS_HANDLE_ERROR(cublasSgemm(cublas,CUBLAS_OP_N,CUBLAS_OP_N,
 			output_size,test_batch_size,1,
@@ -171,13 +171,13 @@ void BaseUnit::testForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf 
 	this->testActivation(output,test_u);
 }
 
-void BaseUnit::testInit(int b){
+void BaseNetwork::testInit(int b){
 	test_batch_size = b;
 	test_u.setSize(output_size,test_batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	all1_t.setSize(1,test_batch_size)->allocateDevice()->initDeviceConstant(1.0f);
 }
 
-void BaseUnit::testRelease(){
+void BaseNetwork::testRelease(){
 	test_u.releaseDevice();
 	all1_t.releaseDevice();
 }

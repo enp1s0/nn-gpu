@@ -2,6 +2,7 @@ NVCC=nvcc
 NVCCFLAGS= -arch=sm_60 -std=c++11 -lcublas -lcurand
 CXX=g++
 CXXFLAGS=-std=c++11
+SRCDIR=src
 OBJDIR=obj
 OBJLIST=cuda_common.o main.o cublas_common.o matrix_array.o basenetwork.o hiddennetwork.o softmaxnetwork.o matrix_function.o mnist.o cuda_event.o aggregation.o neuralnetwork.o
 OBJS= $(addprefix $(OBJDIR)/, $(OBJLIST))
@@ -10,12 +11,10 @@ BIN=nn-gpu
 $(BIN): $(OBJS)
 	$(NVCC) $(NVCCFLAGS) $+ -o $@
 
-.SUFFIXES: .o .cu .cpp
-
-.cu.cpp:
+$(SRCDIR)/%.cpp: $(SRCDIR)/%.cu
 	$(NVCC) $(NVCCFLAGS) --cuda $< -o $@
 
-$(OBJDIR)/%.o: %.cpp
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
 

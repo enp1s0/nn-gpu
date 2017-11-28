@@ -1,1 +1,1 @@
-../cuda_common.cu
+../src/cuda_common.cu

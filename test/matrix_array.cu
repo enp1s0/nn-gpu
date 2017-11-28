@@ -1,1 +1,1 @@
-../matrix_array.cu
+../src/matrix_array.cu

@@ -5,7 +5,7 @@
 namespace mtk{
 	class BaseUnit{
 	protected:
-		std::string network_name;
+		std::string unit_name;
 		int output_size,input_size;
 		int batch_size,test_batch_size;
 		float attenuation_rate,learning_rate,adagrad_epsilon;
@@ -38,7 +38,7 @@ namespace mtk{
 		virtual void learningActivation(mtk::MatrixXf& output,const mtk::MatrixXf& input) = 0;
 		virtual void testActivation(mtk::MatrixXf& output,const mtk::MatrixXf& input) = 0;
 	public:
-		BaseUnit(int input_size,int output_size,int batch_size,std::string network_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate);
+		BaseUnit(int input_size,int output_size,int batch_size,std::string unit_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate);
 		~BaseUnit();
 		void learningForwardPropagation(mtk::MatrixXf &output,const mtk::MatrixXf &input);
 		void learningReflect();

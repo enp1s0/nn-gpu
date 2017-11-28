@@ -37,8 +37,8 @@ public:
 	}
 };
 
-BaseUnit::BaseUnit(int input_size,int output_size,int batch_size,std::string network_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
-	input_size(input_size),output_size(output_size),batch_size(batch_size),network_name(network_name),cublas(cublas),learning_rate(learning_rate),adagrad_epsilon(adagrad_epsilon),attenuation_rate(attenuation_rate)
+BaseUnit::BaseUnit(int input_size,int output_size,int batch_size,std::string unit_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
+	input_size(input_size),output_size(output_size),batch_size(batch_size),unit_name(unit_name),cublas(cublas),learning_rate(learning_rate),adagrad_epsilon(adagrad_epsilon),attenuation_rate(attenuation_rate)
 {
 	w1.setSize(output_size,input_size)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
 	dw1.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
@@ -58,7 +58,7 @@ BaseUnit::BaseUnit(int input_size,int output_size,int batch_size,std::string net
 	max_w_i.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
 	b1_tmp.setSize(output_size,1)->allocateDevice()->initDeviceConstant(0.0f);
 	w1_tmp.setSize(output_size,input_size)->allocateDevice()->initDeviceConstant(0.0f);
-	std::cout<<network_name<<"("<<input_size<<","<<output_size<<","<<batch_size<<")"<<std::endl;
+	std::cout<<unit_name<<"("<<input_size<<","<<output_size<<","<<batch_size<<")"<<std::endl;
 	std::cout<<" - learning rate = "<<learning_rate<<std::endl;
 	std::cout<<" - adagrad epsilon = "<<adagrad_epsilon<<std::endl;
 	std::cout<<" - momentum rate = "<<attenuation_rate<<std::endl;
@@ -146,7 +146,7 @@ mtk::MatrixXf* BaseUnit::getWeightPointer(){return &w1;}
 mtk::MatrixXf* BaseUnit::getBiasPointer(){return &b1;}
 int BaseUnit::getInputSize(){return input_size;}
 int BaseUnit::getOutputSize(){return output_size;}
-std::string BaseUnit::getNetworkName(){return network_name;}
+std::string BaseUnit::getNetworkName(){return unit_name;}
 
 
 // test methods

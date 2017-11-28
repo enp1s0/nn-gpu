@@ -17,8 +17,8 @@ public:
 	}
 };
 
-SoftmaxUnit::SoftmaxUnit(int input_size,int output_size,int batch_size,std::string network_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
-	BaseUnit(input_size,output_size,batch_size,network_name,cublas,learning_rate,adagrad_epsilon,attenuation_rate)
+SoftmaxUnit::SoftmaxUnit(int input_size,int output_size,int batch_size,std::string unit_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
+	BaseUnit(input_size,output_size,batch_size,unit_name,cublas,learning_rate,adagrad_epsilon,attenuation_rate)
 {
 	input_row_0.setSize(1,batch_size)->allocateDevice()->initDeviceConstant(0.0f);
 	inverse.setSize(output_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);

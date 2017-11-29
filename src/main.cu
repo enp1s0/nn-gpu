@@ -10,12 +10,12 @@
 #include "aggregation.h"
 
 const int input_size = 28 * 28;
-const int network0_output_size = 15 * 5;
-//const int network1_output_size = 15 * 15;
+const int network0_output_size = 15 * 15;
+const int network1_output_size = 5 * 15;
 const int last_output_size = 10;
 const int batch_size = 32;
 const int calc = 100000;
-const int test_interval = 10000;
+const int test_interval = calc * 0.1f;
 
 const int test_batch_size = batch_size;
 
@@ -31,9 +31,9 @@ int main(){
 	CUBLAS_HANDLE_ERROR(cublasCreate(&cublas));
 
 	mtk::NeuralNetwork network(batch_size,cublas);
-	network.add(new mtk::HiddenUnit(input_size,network0_output_size,batch_size,"first unit",cublas,1.2,1.0f,0.5f))
-		//->add(new mtk::HiddenUnit(network0_output_size,network1_output_size,batch_size,"second network",cublas))
-		->add(new mtk::SoftmaxUnit(network0_output_size,last_output_size,batch_size,"last unit",cublas))
+	network.add(new mtk::HiddenUnit(input_size,network0_output_size,batch_size,"first unit",cublas,1.2))
+		->add(new mtk::HiddenUnit(network0_output_size,network1_output_size,batch_size,"second unit",cublas,1.2f))
+		->add(new mtk::SoftmaxUnit(network1_output_size,last_output_size,batch_size,"last unit",cublas))
 		->construct();
 	mtk::MatrixXf input,teacher,error,output;
 	input.setSize(input_size,batch_size)->allocateDevice()->initDeviceConstant(0.0f);

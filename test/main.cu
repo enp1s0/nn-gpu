@@ -6,8 +6,8 @@
 #include "matrix_function.h"
 
 const int MATRIX_SIZE_START = 4;
-const int MATRIX_SIZE_END = 1 << 16;
-const int CALC = 100;
+const int MATRIX_SIZE_END = 1 << 14;
+const int CALC = 1000;
 
 const int BLOCK_START = 1 << 5;
 const int BLOCK_END = 1 << 9;
@@ -39,7 +39,7 @@ int main(){
 	mtk::MatrixXf matA,matB;
 	mtk::CudaEvent event;
 	event.createEvent("start")->createEvent("end");
-	for(int i = MATRIX_SIZE_START;i <= MATRIX_SIZE_END;i++){
+	for(int i = MATRIX_SIZE_START;i <= MATRIX_SIZE_END;i+=8){
 		matA.setSize(1,i)->allocateDevice()->initDeviceRandom(-1.0f,1.0f);
 		matB.setSize(1,i)->allocateDevice()->initDeviceConstant(0.0f);
 

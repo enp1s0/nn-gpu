@@ -10,11 +10,11 @@
 #include "aggregation.h"
 
 const int input_size = 28 * 28;
-const int network0_output_size = 15 * 15;
+const int network0_output_size = 5 * 15;
 const int network1_output_size = 5 * 15;
 const int last_output_size = 10;
 const int batch_size = 32;
-const int calc = 100000;
+const int calc = 1000000;
 const int test_interval = calc * 0.1f;
 
 const int test_batch_size = batch_size;

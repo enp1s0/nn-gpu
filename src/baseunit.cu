@@ -37,6 +37,20 @@ public:
 	}
 };
 
+class MaxOut{
+	float ss;
+public:
+	__device__ MaxOut(float ss):ss(ss){}
+	__device__ float operator()(float a) const{
+		float m = fabsf(a);
+		if(m > ss){
+			return ss *a/m;
+		}else{
+			return a;
+		}
+	}
+};
+
 BaseUnit::BaseUnit(int input_size,int output_size,int batch_size,std::string unit_name,cublasHandle_t cublas,float learning_rate,float adagrad_epsilon,float attenuation_rate):
 	input_size(input_size),output_size(output_size),batch_size(batch_size),unit_name(unit_name),cublas(cublas),learning_rate(learning_rate),adagrad_epsilon(adagrad_epsilon),attenuation_rate(attenuation_rate)
 {
@@ -110,6 +124,7 @@ void BaseUnit::learningReflect(){
 				b1.getDevicePointer(),1) );
 	
 	// 重みが大きくなりすぎないように
+	/*
 	int max_w_index = 0;
 	float zero = 0.0f;
 	// 絶対値が最大の要素のindexを返す
@@ -134,7 +149,9 @@ void BaseUnit::learningReflect(){
 	mtk::MatrixFunction::elementwiseProduct(cublas,b1_tmp,max_b_i,b1);
 	// 結果をコピー
 	mtk::MatrixFunction::copy(cublas,w1,w1_tmp);
-	mtk::MatrixFunction::copy(cublas,b1,b1_tmp);
+	mtk::MatrixFunction::copy(cublas,b1,b1_tmp);*/
+	mtk::MatrixFunction::map<MaxOut>(w1,w1,1.0f);
+	mtk::MatrixFunction::map<MaxOut>(b1,b1,1.0f);
 }
 
 void BaseUnit::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2){

@@ -21,6 +21,8 @@ const int test_batch_size = batch_size;
 
 
 int main(){
+	std::cout<<"calc = "<<calc<<std::endl;
+	std::cout<<"test_interval = "<<test_interval<<std::endl;
 	mtk::CudaEvent event;
 	event.createEvent("init_start")
 		->createEvent("init_done")

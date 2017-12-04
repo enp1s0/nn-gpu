@@ -1,6 +1,6 @@
 #pragma once
 
-#include "basenetwork.h"
+#include "baseunit.h"
 #include "hyperparameter.h"
 namespace mtk{
 	class SoftmaxUnit : public BaseUnit{

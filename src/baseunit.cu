@@ -5,7 +5,7 @@
  * 2017.11.20
  * mutsuki
  */
-#include "basenetwork.h"
+#include "baseunit.h"
 #include "matrix_function.h"
 #include "hyperparameter.h"
 #include "cuda_common.h"

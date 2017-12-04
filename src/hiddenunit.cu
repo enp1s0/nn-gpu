@@ -1,4 +1,4 @@
-#include "hiddennetwork.h"
+#include "hiddenunit.h"
 #include "cuda_common.h"
 #include "activation.h"
 #include "matrix_function.h"

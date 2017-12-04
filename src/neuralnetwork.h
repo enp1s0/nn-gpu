@@ -1,5 +1,5 @@
 #pragma once
-#include "basenetwork.h"
+#include "baseunit.h"
 #include "hyperparameter.h"
 #include <vector>
 

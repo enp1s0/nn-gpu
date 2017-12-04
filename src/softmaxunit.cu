@@ -1,4 +1,4 @@
-#include "softmaxnetwork.h"
+#include "softmaxunit.h"
 #include "matrix_function.h"
 #include "cuda_common.h"
 

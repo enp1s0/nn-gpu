@@ -1,8 +1,8 @@
 #include <iostream>
 #include "cuda_common.h"
-#include "hiddennetwork.h"
+#include "hiddenunit.h"
 #include "matrix_array.h"
-#include "softmaxnetwork.h"
+#include "softmaxunit.h"
 #include "matrix_function.h"
 #include "mnist.h"
 #include "cuda_event.h"

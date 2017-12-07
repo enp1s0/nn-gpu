@@ -124,7 +124,6 @@ void BaseUnit::learningReflect(){
 				b1.getDevicePointer(),1) );
 	
 	// 重みが大きくなりすぎないように
-	/*
 	int max_w_index = 0;
 	float zero = 0.0f;
 	// 絶対値が最大の要素のindexを返す
@@ -149,9 +148,9 @@ void BaseUnit::learningReflect(){
 	mtk::MatrixFunction::elementwiseProduct(cublas,b1_tmp,max_b_i,b1);
 	// 結果をコピー
 	mtk::MatrixFunction::copy(cublas,w1,w1_tmp);
-	mtk::MatrixFunction::copy(cublas,b1,b1_tmp);*/
-	mtk::MatrixFunction::map<MaxOut>(w1,w1,1.0f);
-	mtk::MatrixFunction::map<MaxOut>(b1,b1,1.0f);
+	mtk::MatrixFunction::copy(cublas,b1,b1_tmp);
+	//mtk::MatrixFunction::map<MaxOut>(w1,w1,1.0f);
+	//mtk::MatrixFunction::map<MaxOut>(b1,b1,1.0f);
 }
 
 void BaseUnit::learningBackPropagation(mtk::MatrixXf &next_error, const mtk::MatrixXf &d2){

@@ -10,12 +10,12 @@
 #include "aggregation.h"
 
 const int input_size = 28 * 28;
-const int network0_output_size = 5 * 15;
+const int network0_output_size = 15 * 15;
 //const int network1_output_size = 5 * 15;
 const int last_output_size = 10;
-const int batch_size = 32;
-const int calc = 1000000;
-const int test_interval = calc * 0.1f;
+const int batch_size = 72;
+const int calc = 600000;
+const int test_interval = calc * 0.05f;
 
 const int test_batch_size = batch_size;
 
@@ -33,7 +33,7 @@ int main(){
 	CUBLAS_HANDLE_ERROR(cublasCreate(&cublas));
 
 	mtk::NeuralNetwork network(batch_size,cublas);
-	network.add(new mtk::HiddenUnit(input_size,network0_output_size,batch_size,"first unit",cublas,1.2))
+	network.add(new mtk::HiddenUnit(input_size,network0_output_size,batch_size,"first unit",cublas))
 	//	->add(new mtk::HiddenUnit(network0_output_size,network1_output_size,batch_size,"second unit",cublas,1.2f))
 		->add(new mtk::SoftmaxUnit(network0_output_size,last_output_size,batch_size,"last unit",cublas))
 		->construct();
@@ -88,7 +88,7 @@ int main(){
 		network.testForwardPropagation(test_output,test_input);
 		aggregation.matrixCompareWithTeacher(result_matrix,test_output,test_teacher);
 	}
-	result_matrix.copyToHost()->print("result_matrix");
+//	result_matrix.copyToHost()->print("result_matrix");
 
 	//aggregation.clear();
 	//aggregation.compareWithTeacher(output,teacher);

@@ -33,7 +33,7 @@ int main(){
 	CUBLAS_HANDLE_ERROR(cublasCreate(&cublas));
 
 	mtk::NeuralNetwork network(batch_size,cublas);
-	network.add(new mtk::HiddenUnit(input_size,network0_output_size,batch_size,"first unit",cublas))
+	network.add(new mtk::HiddenUnit(input_size,network0_output_size,batch_size,"first unit",cublas,1.2f,0.5f,0.99f))
 	//	->add(new mtk::HiddenUnit(network0_output_size,network1_output_size,batch_size,"second unit",cublas,1.2f))
 		->add(new mtk::SoftmaxUnit(network0_output_size,last_output_size,batch_size,"last unit",cublas))
 		->construct();

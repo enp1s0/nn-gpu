@@ -1,7 +1,7 @@
 NVCC=nvcc
 NVCCFLAGS= -arch=sm_60 -std=c++11 -lcublas -lcurand
 CXX=g++
-CXXFLAGS=-std=c++11
+CXXFLAGS=-std=c++11 
 SRCDIR=src
 OBJDIR=obj
 OBJLIST=cuda_common.o main.o cublas_common.o matrix_array.o baseunit.o hiddenunit.o softmaxunit.o matrix_function.o mnist.o cuda_event.o aggregation.o neuralnetwork.o

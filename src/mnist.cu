@@ -13,7 +13,7 @@ __global__ void deviceRandomArrangementBC(float* input,float* teacher,float *ima
 	curand_init(seed,tid,0,&s);
 	int data_id_0 = curand_uniform(&s) * 60000;
 	int data_id_1 = curand_uniform(&s) * 60000;
-	float r = 0.3f;
+	float r = curand_uniform(&s);
 	for(int i = 0;i < 28*28;i++){
 		input[i+tid*28*28] = image_data[i+data_id_0*28*28] * r + image_data[i+data_id_1*28*28] * (1.0f-r);
 	}

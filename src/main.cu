@@ -13,9 +13,9 @@ const int input_size = 28 * 28;
 const int network0_output_size = 400;
 //const int network1_output_size = 5 * 15;
 const int last_output_size = 10;
-const int batch_size = 72;
-const int calc = 600000;
-const int test_interval = calc * 0.05f;
+const int batch_size = 16;
+const int calc = 300000;
+const int test_interval = calc * 0.01f;
 
 const int test_batch_size = batch_size;
 
@@ -33,8 +33,8 @@ int main(){
 	CUBLAS_HANDLE_ERROR(cublasCreate(&cublas));
 
 	mtk::NeuralNetwork network(batch_size,cublas);
-	network.add(new mtk::HiddenUnit(input_size,network0_output_size,batch_size,"first unit",cublas,1.2f,0.5f,0.99f))
-	//	->add(new mtk::HiddenUnit(network0_output_size,network1_output_size,batch_size,"second unit",cublas,1.2f))
+	network.add(new mtk::HiddenUnit(input_size,network0_output_size,batch_size,"first unit",cublas))
+		//->add(new mtk::HiddenUnit(network0_output_size,network1_output_size,batch_size,"second unit",cublas))
 		->add(new mtk::SoftmaxUnit(network0_output_size,last_output_size,batch_size,"last unit",cublas))
 		->construct();
 	mtk::MatrixXf input,teacher,error,output;

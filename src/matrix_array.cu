@@ -152,7 +152,9 @@ MatrixXf* MatrixXf::splitDevice(mtk::MatrixXf& s0_mat,mtk::MatrixXf& s1_mat){
 		return this;
 	}
 	s0_mat.device_ptr = device_ptr;
+	s0_mat.depth = depth + 1;
 	s1_mat.device_ptr = device_ptr + s0_mat.getSize();
+	s1_mat.depth = depth + 1;
 	return this;
 }
 MatrixXf* MatrixXf::splitHost(mtk::MatrixXf& s0_mat,mtk::MatrixXf& s1_mat){
@@ -163,6 +165,8 @@ MatrixXf* MatrixXf::splitHost(mtk::MatrixXf& s0_mat,mtk::MatrixXf& s1_mat){
 		return this;
 	}
 	s0_mat.host_ptr = host_ptr;
+	s0_mat.depth = depth + 1;
 	s1_mat.host_ptr = host_ptr	+ s0_mat.getSize();
+	s1_mat.depth = depth + 1;
 	return this;
 }

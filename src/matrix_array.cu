@@ -39,7 +39,7 @@ __global__ void deviceCopy(float* device_ptr_dst,float* device_ptr_src,int max_t
 }
 
 MatrixXf::MatrixXf(int rows,int cols):
-	rows(rows),cols(cols),device_ptr(nullptr),host_ptr(nullptr)
+	rows(rows),cols(cols),device_ptr(nullptr),host_ptr(nullptr),depth(0)
 {}
 
 MatrixXf::MatrixXf():MatrixXf(0,0)
@@ -130,12 +130,39 @@ MatrixXf* MatrixXf::print(std::string label){
 }
 
 MatrixXf* MatrixXf::releaseDevice(){
-	CUDA_HANDLE_ERROR( cudaFree( device_ptr ) );
-	device_ptr = nullptr;
+	if(depth==0){
+		CUDA_HANDLE_ERROR( cudaFree( device_ptr ) );
+		device_ptr = nullptr;
+	}
 	return this;
 }
 MatrixXf* MatrixXf::releaseHost(){
-	CUDA_HANDLE_ERROR( cudaFreeHost( host_ptr ) );
-	host_ptr = nullptr;
+	if(depth==0){
+		CUDA_HANDLE_ERROR( cudaFreeHost( host_ptr ) );
+		host_ptr = nullptr;
+	}
+	return this;
+}
+
+MatrixXf* MatrixXf::splitDevice(mtk::MatrixXf& s0_mat,mtk::MatrixXf& s1_mat){
+	if(s0_mat.getSize()+s1_mat.getSize() < this->getSize()){
+		return this;
+	}
+	if(device_ptr == nullptr){
+		return this;
+	}
+	s0_mat.device_ptr = device_ptr;
+	s1_mat.device_ptr = device_ptr + s0_mat.getSize();
+	return this;
+}
+MatrixXf* MatrixXf::splitHost(mtk::MatrixXf& s0_mat,mtk::MatrixXf& s1_mat){
+	if(s0_mat.getSize()+s1_mat.getSize() < this->getSize()){
+		return this;
+	}
+	if(host_ptr == nullptr){
+		return this;
+	}
+	s0_mat.host_ptr = host_ptr;
+	s1_mat.host_ptr = host_ptr	+ s0_mat.getSize();
 	return this;
 }

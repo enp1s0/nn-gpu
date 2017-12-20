@@ -168,9 +168,11 @@ MatrixXf* MatrixXf::splitHost(mtk::MatrixXf& s0_mat,mtk::MatrixXf& s1_mat){
 	if(host_ptr == nullptr){
 		return this;
 	}
-	s0_mat.host_ptr = host_ptr;
+	//s0_mat.host_ptr = host_ptr;
+	s0_mat.setHostPointer(host_ptr);
 	s0_mat.depth = depth + 1;
-	s1_mat.host_ptr = host_ptr	+ s0_mat.getSize();
+	s1_mat.setHostPointer(host_ptr + s0_mat.getSize());
+	//s1_mat.host_ptr = host_ptr	+ s0_mat.getSize();
 	s1_mat.depth = depth + 1;
 	return this;
 }

@@ -20,6 +20,8 @@ namespace mtk{
 		int getSize() const;
 		float* getDevicePointer() const;
 		float* getHostPointer() const ;
+		void setDevicePointer(float* device_ptr);
+		void setHostPointer(float* host_ptr);
 		MatrixXf* copyToDevice();
 		MatrixXf* copyToHost();
 		MatrixXf* copyTo(MatrixXf& dest_matrix) ;
@@ -32,6 +34,6 @@ namespace mtk{
 		MatrixXf* releaseHost();
 		// メモリを2つに割る
 		MatrixXf* splitDevice(mtk::MatrixXf& s0,mtk::MatrixXf& s1);
-		MatrixXf* splitHost(mtk::MatrixXf& s0,mtk::MatrixXf& s1);
+		MatrixXf* splitHost(mtk::MatrixXf& s0,mtk::MatrixXf& s1) ;
 	};
 }

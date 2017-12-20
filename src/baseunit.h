@@ -11,6 +11,8 @@ namespace mtk{
 		float attenuation_rate,learning_rate,adagrad_epsilon;
 		cublasHandle_t cublas;
 
+		mtk::MatrixXf theta;
+
 		mtk::MatrixXf w1;
 		mtk::MatrixXf dw1;
 		mtk::MatrixXf rdw1;

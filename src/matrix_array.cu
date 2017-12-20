@@ -94,6 +94,8 @@ int MatrixXf::getSize()const{return rows * cols;}
 
 float* MatrixXf::getDevicePointer()const{return device_ptr;}
 float* MatrixXf::getHostPointer()const{return host_ptr;}
+void MatrixXf::setDevicePointer(float* dp){device_ptr = dp;}
+void MatrixXf::setHostPointer(float* hp){host_ptr = hp;}
 
 void MatrixXf::operator=(MatrixXf m){
 	this->cols = m.getCols();
@@ -151,9 +153,11 @@ MatrixXf* MatrixXf::splitDevice(mtk::MatrixXf& s0_mat,mtk::MatrixXf& s1_mat){
 	if(device_ptr == nullptr){
 		return this;
 	}
-	s0_mat.device_ptr = device_ptr;
+	//s0_mat.device_ptr = device_ptr;
 	s0_mat.depth = depth + 1;
-	s1_mat.device_ptr = device_ptr + s0_mat.getSize();
+	s0_mat.setDevicePointer(device_ptr);
+	//s1_mat.device_ptr = device_ptr + s0_mat.getSize();
+	s1_mat.setDevicePointer(device_ptr + s0_mat.getSize());
 	s1_mat.depth = depth + 1;
 	return this;
 }

@@ -10,7 +10,7 @@
 #include "aggregation.h"
 
 const int input_size = 28 * 28;
-const int network0_output_size = 100;
+const int network0_output_size = 400;
 //const int network1_output_size = 5 * 15;
 const int last_output_size = 10;
 const int batch_size = 256;
@@ -72,23 +72,26 @@ int main(){
 		network.learningForwardPropagation(output,input)->calcError(error,output,teacher)->learningBackPropagation(error);
 		if((c+1)%test_interval == 0){
 			aggregation.accuracyClear();
+			for(int i = 0;i < 10000;i+=batch_size){
+				mnist.setTrainDataToMatrix(input,teacher,batch_size);
+				network.learningForwardPropagation(output,input)->calcError(error,output,teacher)->learningBackPropagation(error);
+				aggregation.accuracyCompareWithTeacher(output,teacher);
+			}
+			std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;
+			std::cout<<" - train accuracy = "<<aggregation.accuracyCalcAccuracy()*100<<" %"<<std::endl;
+			aggregation.accuracyClear();
 			for(int i = 0;i < 10000;i+=test_batch_size){
 				mnist.setTestDataToMatrix(test_input, test_teacher,i,test_batch_size);
 				network.testForwardPropagation(test_output,test_input);
 				aggregation.accuracyCompareWithTeacher(test_output,test_teacher);
 			}
 			std::cout<<(c+1)<<" / "<<calc<<" ("<<(100.0f*(c+1)/calc)<<"%)"<<std::endl;
-			std::cout<<" - accuracy = "<<aggregation.accuracyCalcAccuracy()*100<<" %"<<std::endl;
+			std::cout<<" - test accuracy = "<<aggregation.accuracyCalcAccuracy()*100<<" %"<<std::endl;
 		}
 	}
-	mtk::MatrixXf result_matrix;
-	result_matrix.setSize(last_output_size,last_output_size)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
-	for(int i = 0;i < 10000;i+=test_batch_size){
-		mnist.setTestDataToMatrix(test_input, test_teacher,i,test_batch_size);
-		network.testForwardPropagation(test_output,test_input);
-		aggregation.matrixCompareWithTeacher(result_matrix,test_output,test_teacher);
-	}
-//	result_matrix.copyToHost()->print("result_matrix");
+	//mtk::MatrixXf result_matrix;
+	//result_matrix.setSize(last_output_size,last_output_size)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
+	//	result_matrix.copyToHost()->print("result_matrix");
 
 	//aggregation.clear();
 	//aggregation.compareWithTeacher(output,teacher);

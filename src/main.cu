@@ -13,8 +13,8 @@ const int input_size = 28 * 28;
 const int network0_output_size = 400;
 //const int network1_output_size = 5 * 15;
 const int last_output_size = 10;
-const int batch_size = 256;
-const int calc = 60000;
+const int batch_size = 128;
+const int calc = 100000;
 const int test_interval = calc * 0.01f;
 
 const int test_batch_size = 1000;
@@ -89,9 +89,14 @@ int main(){
 			std::cout<<" - test accuracy = "<<aggregation.accuracyCalcAccuracy()*100<<" %"<<std::endl;
 		}
 	}
-	//mtk::MatrixXf result_matrix;
-	//result_matrix.setSize(last_output_size,last_output_size)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
-	//	result_matrix.copyToHost()->print("result_matrix");
+	mtk::MatrixXf result_matrix;
+	result_matrix.setSize(last_output_size,last_output_size)->allocateDevice()->allocateHost()->initDeviceConstant(0.0f);
+	for(int i = 0;i < 10000;i+=test_batch_size){
+		mnist.setTestDataToMatrix(test_input, test_teacher,i,test_batch_size);
+		network.testForwardPropagation(test_output,test_input);
+		aggregation.matrixCompareWithTeacher(result_matrix,test_output,test_teacher);
+	}
+	result_matrix.copyToHost()->print("result_matrix");
 
 	//aggregation.clear();
 	//aggregation.compareWithTeacher(output,teacher);

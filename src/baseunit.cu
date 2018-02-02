@@ -12,13 +12,6 @@
 #include <iostream>
 
 using namespace mtk;
-template<class T>
-__global__ void deviceMap(float *device_ptr_dst,float* device_ptr_src,float a,int max_t){
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
-	if(max_t <= tid)
-		return;
-	device_ptr_dst[tid] = T(a)(device_ptr_src[tid]);
-}
 
 class AdagradMake{
 	float s;

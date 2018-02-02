@@ -100,9 +100,11 @@ void BaseUnit::learningForwardPropagation(mtk::MatrixXf &output,const mtk::Matri
 
 void BaseUnit::learningReflect(){
 	const float one = 1.0f;
+	const float rmsprop_alpha = 0.9f;
 	const float minus_learning_rate = -learning_rate;
-	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_w1,rdw1,rdw1,1.0f,1.0f);
-	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_b1,rdb1,rdb1,1.0f,1.0f);
+	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_w1,rdw1,rdw1,1.0f-rmsprop_alpha,rmsprop_alpha);
+	mtk::MatrixFunction::elementwiseProduct(cublas,adagrad_b1,rdb1,rdb1,1.0f-rmsprop_alpha,rmsprop_alpha);
+
 	// dw1を作る
 	mtk::MatrixFunction::map<AdagradMake>(w1_tmp,adagrad_w1,adagrad_epsilon);
 	mtk::MatrixFunction::elementwiseProduct(cublas,dw1,rdw1,w1_tmp,minus_learning_rate,attenuation_rate);

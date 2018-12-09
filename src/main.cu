@@ -25,6 +25,7 @@ const std::string data_dir = "kmnist";
 int main(){
 	std::cout<<"calc = "<<calc<<std::endl;
 	std::cout<<"test_interval = "<<test_interval<<std::endl;
+	std::cout<<"data directory = "<<data_dir<<std::endl;
 	mtk::CudaEvent event;
 	event.createEvent("init_start")
 		->createEvent("init_done")
